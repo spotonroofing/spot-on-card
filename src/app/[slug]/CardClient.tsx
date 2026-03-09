@@ -91,7 +91,6 @@ export default function CardClient({ rep, company }: { rep: RepData; company: Co
     <div className="min-h-screen bg-black flex flex-col items-center">
       <style>{`
         * { -webkit-tap-highlight-color: transparent; }
-        @media (hover: none) { *:hover { color: inherit; background: inherit; } }
         @keyframes fadeUp {
           from { opacity: 0; transform: translateY(20px); }
           to { opacity: 1; transform: translateY(0); }
@@ -101,7 +100,7 @@ export default function CardClient({ rep, company }: { rep: RepData; company: Co
           animation: fadeUp 400ms ease-out forwards;
         }
         .tap-feedback {
-          transition: transform 150ms ease, color 150ms ease, background-color 150ms ease, border-color 150ms ease;
+          transition: transform 150ms ease;
         }
         .tap-feedback:active {
           transform: scale(0.96);
