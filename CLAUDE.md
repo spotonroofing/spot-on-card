@@ -79,7 +79,14 @@ RESEND_FROM_EMAIL=       # e.g. noreply@spotonroof.com
 
 ## Current State
 
-Status: Not started. Full spec available in SPEC.md. Build order: Phase 1 Foundation, Phase 2 Registration and Profiles, Phase 3 Public Card Page, Phase 4 Analytics, Phase 5 Admin Dashboard, Phase 6 Polish.
+Status: All 6 phases complete. App builds successfully. All pages, API routes, middleware, and components are implemented.
+
+- Phase 1 Foundation: Done (Next.js, Prisma, NextAuth, login)
+- Phase 2 Registration & Profiles: Done (register, edit page, photo upload)
+- Phase 3 Public Card Page: Done ([slug] page, vCard endpoint, QR code)
+- Phase 4 Analytics: Done (event logging, bot filtering, stats API)
+- Phase 5 Admin Dashboard: Done (rep CRUD, company settings, analytics overview)
+- Phase 6 Polish: Done (middleware auth guards, OG meta tags, not-found page, SessionProvider)
 
 ## Known Gotchas
 
