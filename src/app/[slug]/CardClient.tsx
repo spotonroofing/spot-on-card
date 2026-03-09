@@ -32,7 +32,7 @@ interface CompanyData {
 }
 
 export default function CardClient({ rep, company }: { rep: RepData; company: CompanyData | null }) {
-  const [qrSvg, setQrSvg] = useState('');
+  const [shareFeedback, setShareFeedback] = useState('');
 
   // Log card_view on mount
   useEffect(() => {
@@ -42,19 +42,6 @@ export default function CardClient({ rep, company }: { rep: RepData; company: Co
       body: JSON.stringify({ repId: rep.id, eventType: 'card_view' }),
     }).catch(() => {});
   }, [rep.id]);
-
-  // Generate QR code client-side for display
-  useEffect(() => {
-    import('qrcode').then(QRCode => {
-      const url = `${window.location.origin}/${rep.slug}`;
-      QRCode.toString(url, {
-        type: 'svg',
-        color: { dark: '#ffffff', light: '#00000000' },
-        width: 120,
-        margin: 0,
-      }).then(svg => setQrSvg(svg));
-    }).catch(() => {});
-  }, [rep.slug]);
 
   function handleSaveContact() {
     // Log contact_tap
@@ -95,32 +82,18 @@ export default function CardClient({ rep, company }: { rep: RepData; company: Co
       <div className="w-full max-w-md mx-auto px-4 py-8">
         {/* Logo */}
         <div className="text-center mb-8">
-          <div className="text-2xl font-bold">
-            <span className="text-white">Spot</span>
-            <span className="text-spoton-blue">On</span>
-            <span className="text-white">Roof</span>
-          </div>
+          <img
+            src="/images/logo-white.png"
+            alt="SpotOnRoof"
+            className="mx-auto h-auto"
+            style={{ maxWidth: '200px' }}
+          />
         </div>
 
-        {/* Profile Photo with Roof Arch */}
+        {/* Profile Photo */}
         <div className="flex justify-center mb-6">
           <div className="relative">
-            {/* White roof arch SVG behind photo */}
-            <svg
-              className="absolute -top-4 left-1/2 -translate-x-1/2"
-              width="160"
-              height="40"
-              viewBox="0 0 160 40"
-              fill="none"
-            >
-              <path
-                d="M10 40 Q80 -10 150 40"
-                stroke="white"
-                strokeWidth="3"
-                fill="none"
-              />
-            </svg>
-            <div className="w-36 h-36 rounded-full overflow-hidden border-4 border-white/20 bg-zinc-800 relative z-10">
+            <div className="w-36 h-36 rounded-full overflow-hidden border-4 border-white/20 bg-zinc-800">
               {rep.profilePhoto ? (
                 <img
                   src={rep.profilePhoto}
@@ -147,15 +120,17 @@ export default function CardClient({ rep, company }: { rep: RepData; company: Co
         </div>
 
         {/* Save Contact Button */}
-        <button
-          onClick={handleSaveContact}
-          className="w-full py-4 bg-gradient-to-r from-teal-start to-teal-end text-white font-bold rounded-xl text-lg hover:opacity-90 transition-opacity flex items-center justify-center gap-2 mb-8"
-        >
-          <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-          </svg>
-          Save Contact
-        </button>
+        <div className="flex justify-center mb-8">
+          <button
+            onClick={handleSaveContact}
+            className="px-8 py-2.5 border-2 border-[#00AEEF] bg-transparent text-white font-bold rounded-full text-base hover:bg-[#00AEEF]/10 transition-colors flex items-center justify-center gap-2"
+          >
+            <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+            </svg>
+            Save Contact
+          </button>
+        </div>
 
         {/* Contact Info */}
         <div className="space-y-3 mb-8">
@@ -223,27 +198,36 @@ export default function CardClient({ rep, company }: { rep: RepData; company: Co
           </div>
         )}
 
+        {/* Share Button */}
+        <div className="flex justify-center mb-8">
+          <button
+            onClick={async () => {
+              const url = window.location.href;
+              const title = `${rep.firstName} ${rep.lastName}`;
+              if (navigator.share) {
+                try {
+                  await navigator.share({ title, url });
+                } catch {
+                  // User cancelled share
+                }
+              } else {
+                await navigator.clipboard.writeText(url);
+                setShareFeedback('Link copied!');
+                setTimeout(() => setShareFeedback(''), 2000);
+              }
+            }}
+            className="text-sm rounded-full border border-gray-600 text-gray-400 px-6 py-2 hover:border-gray-400 transition-colors"
+          >
+            {shareFeedback || 'Share my card'}
+          </button>
+        </div>
+
         {/* Bio */}
         {rep.bio && (
           <div className="mb-8 text-center">
             <p className="text-zinc-400 text-sm leading-relaxed">{rep.bio}</p>
           </div>
         )}
-
-        {/* QR Code */}
-        <div className="text-center mb-8">
-          <p className="text-zinc-500 text-xs mb-3">Share my card</p>
-          <div className="inline-block p-3 bg-zinc-900 border border-zinc-800 rounded-xl">
-            {qrSvg ? (
-              <div
-                className="w-[120px] h-[120px]"
-                dangerouslySetInnerHTML={{ __html: qrSvg }}
-              />
-            ) : (
-              <div className="w-[120px] h-[120px] bg-zinc-800 rounded animate-pulse" />
-            )}
-          </div>
-        </div>
 
         {/* Footer */}
         <div className="text-center pt-4 border-t border-zinc-800">
