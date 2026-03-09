@@ -91,6 +91,7 @@ export default function CardClient({ rep, company }: { rep: RepData; company: Co
     <div className="min-h-screen bg-black flex flex-col items-center">
       <style>{`
         * { -webkit-tap-highlight-color: transparent; }
+        @media (hover: none) { *:hover { color: inherit; background: inherit; } }
         @keyframes fadeUp {
           from { opacity: 0; transform: translateY(20px); }
           to { opacity: 1; transform: translateY(0); }
@@ -150,7 +151,7 @@ export default function CardClient({ rep, company }: { rep: RepData; company: Co
         <div className="flex justify-center mb-8 fade-in" style={{ animationDelay: '200ms' }}>
           <button
             onClick={handleSaveContact}
-            className="tap-feedback px-8 py-2.5 border-2 border-[#00AEEF] bg-transparent text-white font-bold rounded-full text-base hover:bg-[#00AEEF]/10 flex items-center justify-center gap-2"
+            className="tap-feedback px-8 py-2.5 border-2 border-[#00AEEF] bg-transparent text-white font-bold rounded-full text-base flex items-center justify-center gap-2"
           >
             <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
@@ -162,7 +163,7 @@ export default function CardClient({ rep, company }: { rep: RepData; company: Co
         {/* Contact Info */}
         <div className="space-y-3 mb-8">
           {rep.phone && (
-            <a href={`tel:${rep.phone}`} className="tap-feedback flex items-center gap-3 text-white hover:text-spoton-blue p-3 bg-zinc-900 rounded-xl border border-zinc-800 fade-in" style={{ animationDelay: `${contactRows.find(r => r.type === 'phone')!.delay}ms` }}>
+            <a href={`tel:${rep.phone}`} className="tap-feedback flex items-center gap-3 text-white p-3 bg-zinc-900 rounded-xl border border-zinc-800 fade-in" style={{ animationDelay: `${contactRows.find(r => r.type === 'phone')!.delay}ms` }}>
               <div className="w-10 h-10 bg-zinc-800 rounded-full flex items-center justify-center flex-shrink-0">
                 <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
@@ -173,7 +174,7 @@ export default function CardClient({ rep, company }: { rep: RepData; company: Co
           )}
 
           {rep.email && (
-            <a href={`mailto:${rep.email}`} className="tap-feedback flex items-center gap-3 text-white hover:text-spoton-blue p-3 bg-zinc-900 rounded-xl border border-zinc-800 fade-in" style={{ animationDelay: `${contactRows.find(r => r.type === 'email')!.delay}ms` }}>
+            <a href={`mailto:${rep.email}`} className="tap-feedback flex items-center gap-3 text-white p-3 bg-zinc-900 rounded-xl border border-zinc-800 fade-in" style={{ animationDelay: `${contactRows.find(r => r.type === 'email')!.delay}ms` }}>
               <div className="w-10 h-10 bg-zinc-800 rounded-full flex items-center justify-center flex-shrink-0">
                 <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
@@ -184,7 +185,7 @@ export default function CardClient({ rep, company }: { rep: RepData; company: Co
           )}
 
           {company?.companyAddress && (
-            <a href={mapsUrl!} target="_blank" rel="noopener noreferrer" className="tap-feedback flex items-center gap-3 text-white hover:text-spoton-blue p-3 bg-zinc-900 rounded-xl border border-zinc-800 fade-in" style={{ animationDelay: `${contactRows.find(r => r.type === 'address')!.delay}ms` }}>
+            <a href={mapsUrl!} target="_blank" rel="noopener noreferrer" className="tap-feedback flex items-center gap-3 text-white p-3 bg-zinc-900 rounded-xl border border-zinc-800 fade-in" style={{ animationDelay: `${contactRows.find(r => r.type === 'address')!.delay}ms` }}>
               <div className="w-10 h-10 bg-zinc-800 rounded-full flex items-center justify-center flex-shrink-0">
                 <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
@@ -196,7 +197,7 @@ export default function CardClient({ rep, company }: { rep: RepData; company: Co
           )}
 
           {company?.companyWebsite && (
-            <a href={company.companyWebsite} target="_blank" rel="noopener noreferrer" className="tap-feedback flex items-center gap-3 text-white hover:text-spoton-blue p-3 bg-zinc-900 rounded-xl border border-zinc-800 fade-in" style={{ animationDelay: `${contactRows.find(r => r.type === 'website')!.delay}ms` }}>
+            <a href={company.companyWebsite} target="_blank" rel="noopener noreferrer" className="tap-feedback flex items-center gap-3 text-white p-3 bg-zinc-900 rounded-xl border border-zinc-800 fade-in" style={{ animationDelay: `${contactRows.find(r => r.type === 'website')!.delay}ms` }}>
               <div className="w-10 h-10 bg-zinc-800 rounded-full flex items-center justify-center flex-shrink-0">
                 <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9" />
@@ -216,7 +217,7 @@ export default function CardClient({ rep, company }: { rep: RepData; company: Co
                 href={social.url}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="tap-feedback w-11 h-11 bg-zinc-900 border border-zinc-800 rounded-full flex items-center justify-center text-white hover:text-spoton-blue hover:border-spoton-blue"
+                className="tap-feedback w-11 h-11 bg-zinc-900 border border-zinc-800 rounded-full flex items-center justify-center text-white"
                 title={social.label}
               >
                 <SocialIcon type={social.type} />
@@ -243,7 +244,7 @@ export default function CardClient({ rep, company }: { rep: RepData; company: Co
                 setTimeout(() => setShareFeedback(''), 2000);
               }
             }}
-            className="tap-feedback text-sm rounded-full border border-gray-600 text-gray-400 px-6 py-2 hover:border-gray-400"
+            className="tap-feedback text-sm rounded-full border border-gray-600 text-gray-400 px-6 py-2"
           >
             {shareFeedback || 'Share my card'}
           </button>
