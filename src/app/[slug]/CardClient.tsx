@@ -229,15 +229,6 @@ export default function CardClient({ rep, company }: { rep: RepData; company: Co
           </div>
         )}
 
-        {/* Footer */}
-        <div className="text-center pt-4 border-t border-zinc-800">
-          <p className="text-zinc-600 text-xs">
-            Powered by{' '}
-            <span className="text-zinc-500">Spot</span>
-            <span className="text-spoton-blue/60">On</span>
-            <span className="text-zinc-500">Roof</span>
-          </p>
-        </div>
       </div>
     </div>
   );
