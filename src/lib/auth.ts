@@ -4,7 +4,12 @@ import { PrismaAdapter } from '@auth/prisma-adapter';
 import { prisma } from './prisma';
 import { Resend } from 'resend';
 
-const resend = new Resend(process.env.RESEND_API_KEY);
+function getResend() {
+  if (!process.env.RESEND_API_KEY) {
+    throw new Error('RESEND_API_KEY is not set');
+  }
+  return new Resend(process.env.RESEND_API_KEY);
+}
 
 export const { handlers, signIn, signOut, auth } = NextAuth({
   adapter: PrismaAdapter(prisma) as any,
@@ -14,7 +19,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
       from: process.env.RESEND_FROM_EMAIL || 'noreply@spotonroof.com',
       sendVerificationRequest: async ({ identifier: email, url }) => {
         try {
-          await resend.emails.send({
+          await getResend().emails.send({
             from: process.env.RESEND_FROM_EMAIL || 'noreply@spotonroof.com',
             to: email,
             subject: 'Sign in to SpotOnRoof',
