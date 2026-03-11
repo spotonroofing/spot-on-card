@@ -33,6 +33,14 @@ interface CompanyData {
 
 export default function CardClient({ rep, company }: { rep: RepData; company: CompanyData | null }) {
   const [shareFeedback, setShareFeedback] = useState('');
+  const [loaded, setLoaded] = useState(false);
+  const [tapped, setTapped] = useState<string | null>(null);
+
+  // Trigger entrance animations after mount
+  useEffect(() => {
+    const t = setTimeout(() => setLoaded(true), 50);
+    return () => clearTimeout(t);
+  }, []);
 
   // Log card_view on mount
   useEffect(() => {
@@ -53,6 +61,12 @@ export default function CardClient({ rep, company }: { rep: RepData; company: Co
 
     // Trigger vCard download
     window.location.href = `/api/vcard/${rep.slug}`;
+  }
+
+  // Tap flash helper — sets tapped key, clears after 200ms
+  function flash(key: string) {
+    setTapped(key);
+    setTimeout(() => setTapped(null), 200);
   }
 
   const mapsUrl = company?.companyAddress
@@ -77,147 +91,244 @@ export default function CardClient({ rep, company }: { rep: RepData; company: Co
   if (rep.personalTikTok && !companyTypes.has('tiktok')) socials.push({ type: 'tiktok', url: rep.personalTikTok, label: 'TikTok' });
   if (rep.personalWebsite) socials.push({ type: 'website', url: rep.personalWebsite, label: 'Website' });
 
-  // Track which contact rows exist to assign sequential delays
-  const contactRows: { type: string; delay: number }[] = [];
-  let rowDelay = 300;
-  if (rep.phone) { contactRows.push({ type: 'phone', delay: rowDelay }); rowDelay += 50; }
-  if (rep.email) { contactRows.push({ type: 'email', delay: rowDelay }); rowDelay += 50; }
-  if (company?.companyAddress) { contactRows.push({ type: 'address', delay: rowDelay }); rowDelay += 50; }
-  if (company?.companyWebsite) { contactRows.push({ type: 'website', delay: rowDelay }); rowDelay += 50; }
-  const socialDelay = rowDelay;
-  const shareDelay = socialDelay + 50;
+  // Animation stagger: each section gets an increasing delay
+  const hasPhone = rep.phone || company?.companyPhone;
+  let sectionIndex = 0;
+  const heroIdx = sectionIndex++;
+  const nameIdx = sectionIndex++;
+  const titleIdx = rep.jobTitle ? sectionIndex++ : -1;
+  const quoteIdx = rep.bio ? sectionIndex++ : -1;
+  const phoneIdx = hasPhone ? sectionIndex++ : -1;
+  const emailIdx = rep.email ? sectionIndex++ : -1;
+  const addressIdx = company?.companyAddress ? sectionIndex++ : -1;
+  const websiteIdx = company?.companyWebsite ? sectionIndex++ : -1;
+  const socialsIdx = socials.length > 0 ? sectionIndex++ : -1;
+  const actionsIdx = sectionIndex++;
+  const footerIdx = sectionIndex++;
+
+  function sectionStyle(idx: number) {
+    const delay = idx * 80; // 80ms stagger
+    return {
+      opacity: loaded ? 1 : 0,
+      transform: loaded ? 'translateY(0)' : 'translateY(20px)',
+      transition: `opacity 0.5s ease-out ${delay}ms, transform 0.5s ease-out ${delay}ms`,
+    };
+  }
+
+  // Tap style helper — returns inline style for tapped state
+  function tapStyle(key: string): React.CSSProperties {
+    const active = tapped === key;
+    return {
+      transition: 'transform 200ms ease, background-color 200ms ease',
+      transform: active ? 'scale(0.96)' : 'scale(1)',
+      backgroundColor: active ? 'rgba(0, 174, 239, 0.08)' : 'transparent',
+    };
+  }
+
+  function buttonTapStyle(key: string): React.CSSProperties {
+    const active = tapped === key;
+    return {
+      transition: 'transform 200ms ease, filter 200ms ease',
+      transform: active ? 'scale(0.95)' : 'scale(1)',
+      filter: active ? 'brightness(0.85)' : 'brightness(1)',
+    };
+  }
 
   return (
-    <div className="min-h-screen bg-black flex flex-col items-center">
+    <div className="min-h-screen bg-card-bg flex flex-col items-center font-sans">
       <style>{`
         * { -webkit-tap-highlight-color: transparent; }
-        @keyframes fadeUp {
-          from { opacity: 0; transform: translateY(20px); }
-          to { opacity: 1; transform: translateY(0); }
-        }
-        .fade-in {
-          opacity: 0;
-          animation: fadeUp 400ms ease-out forwards;
-        }
-        .tap-feedback {
-          transition: transform 150ms ease;
-        }
-        .tap-feedback:active {
-          transform: scale(0.96);
-        }
       `}</style>
-      <div className="w-full max-w-md mx-auto px-4 py-8">
-        {/* Logo */}
-        <div className="text-center mb-8 fade-in" style={{ animationDelay: '0ms' }}>
+      <div className="w-full max-w-md mx-auto">
+
+        {/* ─── 1. HERO PHOTO ─── */}
+        <div className="relative w-full" style={{ ...sectionStyle(heroIdx), height: '45vh' }}>
+          {rep.profilePhoto ? (
+            <img
+              src={rep.profilePhoto}
+              alt={`${rep.firstName} ${rep.lastName}`}
+              className="w-full h-full object-cover"
+            />
+          ) : (
+            <div className="w-full h-full bg-gradient-to-b from-card-surface to-card-bg flex items-center justify-center">
+              <div className="w-28 h-28 rounded-full bg-card-bg border border-white/10 flex items-center justify-center">
+                <span className="text-4xl font-outfit font-bold text-spoton-blue">
+                  {rep.firstName[0]}{rep.lastName[0]}
+                </span>
+              </div>
+            </div>
+          )}
+
+          {/* Gradient overlay */}
+          <div
+            className="absolute inset-0 pointer-events-none"
+            style={{ background: 'linear-gradient(to bottom, transparent 40%, #111111 100%)' }}
+          />
+
+          {/* Logo watermark */}
           <img
             src="/images/logo-white.png"
-            alt="SpotOnRoof"
-            className="mx-auto h-auto"
-            style={{ maxWidth: '200px' }}
+            alt=""
+            className="absolute top-4 right-4 h-8 opacity-20 pointer-events-none"
           />
         </div>
 
-        {/* Profile Photo */}
-        <div className="flex justify-center mb-6 fade-in" style={{ animationDelay: '100ms' }}>
-          <div className="relative">
-            <div className="w-36 h-36 rounded-full overflow-hidden border-4 border-white/20 bg-zinc-800">
-              {rep.profilePhoto ? (
-                <img
-                  src={rep.profilePhoto}
-                  alt={`${rep.firstName} ${rep.lastName}`}
-                  className="w-full h-full object-cover"
-                />
-              ) : (
-                <div className="w-full h-full flex items-center justify-center text-4xl font-bold text-zinc-500">
-                  {rep.firstName[0]}{rep.lastName[0]}
-                </div>
-              )}
-            </div>
-          </div>
-        </div>
-
-        {/* Name & Title */}
-        <div className="text-center mb-6 fade-in" style={{ animationDelay: '100ms' }}>
-          <h1 className="text-2xl font-bold text-white">
-            {rep.firstName} {rep.lastName}
+        {/* ─── 2. NAME BLOCK ─── */}
+        <div className="px-6 -mt-16 relative z-10" style={sectionStyle(nameIdx)}>
+          <h1 className="font-outfit uppercase tracking-[0.2em]">
+            <span className="block text-3xl font-light text-white leading-tight">
+              {rep.firstName}
+            </span>
+            <span className="block text-4xl font-extrabold text-white leading-tight">
+              {rep.lastName}
+            </span>
           </h1>
           {rep.jobTitle && (
-            <p className="text-spoton-blue text-lg mt-1">{rep.jobTitle}</p>
+            <p
+              className="text-spoton-blue text-xs uppercase tracking-[0.15em] font-outfit font-semibold mt-2"
+              style={titleIdx >= 0 ? sectionStyle(titleIdx) : undefined}
+            >
+              {rep.jobTitle}
+            </p>
           )}
         </div>
 
-        {/* Save Contact Button */}
-        <div className="flex justify-center mb-8 fade-in" style={{ animationDelay: '200ms' }}>
-          <button
-            onClick={handleSaveContact}
-            className="tap-feedback px-8 py-2.5 border-2 border-[#00AEEF] bg-transparent text-white font-bold rounded-full text-base flex items-center justify-center gap-2"
-          >
-            <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-            </svg>
-            Save Contact
-          </button>
-        </div>
+        {/* ─── 3. DIVIDER + QUOTE ─── */}
+        {rep.bio && (
+          <div className="px-6 mt-6" style={quoteIdx >= 0 ? sectionStyle(quoteIdx) : undefined}>
+            <div
+              className="h-px w-full mb-4"
+              style={{ background: 'linear-gradient(to right, transparent, #00AEEF, transparent)' }}
+            />
+            <p className="text-zinc-400 text-sm italic leading-relaxed">
+              &ldquo;{rep.bio}&rdquo;
+            </p>
+          </div>
+        )}
 
-        {/* Contact Info */}
-        <div className="space-y-3 mb-8">
-          {rep.phone && (
-            <a href={`tel:${rep.phone}`} className="tap-feedback flex items-center gap-3 text-white p-3 bg-zinc-900 rounded-xl border border-zinc-800 fade-in" style={{ animationDelay: `${contactRows.find(r => r.type === 'phone')!.delay}ms` }}>
-              <div className="w-10 h-10 bg-zinc-800 rounded-full flex items-center justify-center flex-shrink-0">
-                <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        {/* ─── 4. CONTACT ROWS ─── */}
+        <div className="px-6 mt-6 space-y-2">
+
+          {/* Phone row (compound: Mobile + Office) */}
+          {hasPhone && (
+            <div
+              className="flex items-start gap-3 py-2 rounded-xl"
+              style={{ ...sectionStyle(phoneIdx), ...tapStyle('phone') }}
+            >
+              <div className="w-10 h-10 rounded-lg bg-spoton-blue/10 border border-spoton-blue/20 flex items-center justify-center flex-shrink-0 mt-0.5">
+                <svg className="w-5 h-5 text-spoton-blue" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
                 </svg>
               </div>
-              <span>{rep.phone}</span>
-            </a>
+              <div className="flex-1 min-w-0 space-y-1">
+                {rep.phone && (
+                  <a
+                    href={`tel:${rep.phone}`}
+                    className="block text-sm"
+                    onClick={() => flash('phone-mobile')}
+                    style={tapStyle('phone-mobile')}
+                  >
+                    <span className="text-zinc-500 text-xs uppercase tracking-wider block">Mobile</span>
+                    <span className="text-white block">{rep.phone}</span>
+                  </a>
+                )}
+                {company?.companyPhone && (
+                  <a
+                    href={`tel:${company.companyPhone}`}
+                    className="block text-sm"
+                    onClick={() => flash('phone-office')}
+                    style={tapStyle('phone-office')}
+                  >
+                    <span className="text-zinc-500 text-xs uppercase tracking-wider block">Office</span>
+                    <span className="text-white block">{company.companyPhone}</span>
+                  </a>
+                )}
+              </div>
+            </div>
           )}
 
+          {/* Email row */}
           {rep.email && (
-            <a href={`mailto:${rep.email}`} className="tap-feedback flex items-center gap-3 text-white p-3 bg-zinc-900 rounded-xl border border-zinc-800 fade-in" style={{ animationDelay: `${contactRows.find(r => r.type === 'email')!.delay}ms` }}>
-              <div className="w-10 h-10 bg-zinc-800 rounded-full flex items-center justify-center flex-shrink-0">
-                <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <a
+              href={`mailto:${rep.email}`}
+              className="flex items-center gap-3 py-2 rounded-xl block"
+              onClick={() => flash('email')}
+              style={{ ...sectionStyle(emailIdx), ...tapStyle('email') }}
+            >
+              <div className="w-10 h-10 rounded-lg bg-spoton-blue/10 border border-spoton-blue/20 flex items-center justify-center flex-shrink-0">
+                <svg className="w-5 h-5 text-spoton-blue" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
                 </svg>
               </div>
-              <span className="truncate">{rep.email}</span>
+              <div className="flex-1 min-w-0">
+                <span className="text-zinc-500 text-xs uppercase tracking-wider block">Email</span>
+                <span className="text-white text-sm block truncate">{rep.email}</span>
+              </div>
             </a>
           )}
 
+          {/* Address row */}
           {company?.companyAddress && (
-            <a href={mapsUrl!} target="_blank" rel="noopener noreferrer" className="tap-feedback flex items-center gap-3 text-white p-3 bg-zinc-900 rounded-xl border border-zinc-800 fade-in" style={{ animationDelay: `${contactRows.find(r => r.type === 'address')!.delay}ms` }}>
-              <div className="w-10 h-10 bg-zinc-800 rounded-full flex items-center justify-center flex-shrink-0">
-                <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <a
+              href={mapsUrl!}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex items-center gap-3 py-2 rounded-xl block"
+              onClick={() => flash('address')}
+              style={{ ...sectionStyle(addressIdx), ...tapStyle('address') }}
+            >
+              <div className="w-10 h-10 rounded-lg bg-spoton-blue/10 border border-spoton-blue/20 flex items-center justify-center flex-shrink-0">
+                <svg className="w-5 h-5 text-spoton-blue" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
                 </svg>
               </div>
-              <span className="text-sm">{company.companyAddress}</span>
+              <div className="flex-1 min-w-0">
+                <span className="text-zinc-500 text-xs uppercase tracking-wider block">Office</span>
+                <span className="text-white text-sm block">{company.companyAddress}</span>
+              </div>
             </a>
           )}
 
+          {/* Website row */}
           {company?.companyWebsite && (
-            <a href={company.companyWebsite} target="_blank" rel="noopener noreferrer" className="tap-feedback flex items-center gap-3 text-white p-3 bg-zinc-900 rounded-xl border border-zinc-800 fade-in" style={{ animationDelay: `${contactRows.find(r => r.type === 'website')!.delay}ms` }}>
-              <div className="w-10 h-10 bg-zinc-800 rounded-full flex items-center justify-center flex-shrink-0">
-                <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <a
+              href={company.companyWebsite}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex items-center gap-3 py-2 rounded-xl block"
+              onClick={() => flash('website')}
+              style={{ ...sectionStyle(websiteIdx), ...tapStyle('website') }}
+            >
+              <div className="w-10 h-10 rounded-lg bg-spoton-blue/10 border border-spoton-blue/20 flex items-center justify-center flex-shrink-0">
+                <svg className="w-5 h-5 text-spoton-blue" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9" />
                 </svg>
               </div>
-              <span>{company.companyWebsite.replace(/^https?:\/\//, '')}</span>
+              <div className="flex-1 min-w-0">
+                <span className="text-zinc-500 text-xs uppercase tracking-wider block">Website</span>
+                <span className="text-white text-sm block">{company.companyWebsite.replace(/^https?:\/\//, '')}</span>
+              </div>
             </a>
           )}
         </div>
 
-        {/* Social Links */}
+        {/* ─── 5. SOCIAL ICONS ─── */}
         {socials.length > 0 && (
-          <div className="flex justify-center gap-4 mb-8 fade-in" style={{ animationDelay: `${socialDelay}ms` }}>
+          <div
+            className="flex justify-center gap-3 px-6 mt-6"
+            style={socialsIdx >= 0 ? sectionStyle(socialsIdx) : undefined}
+          >
             {socials.map((social, i) => (
               <a
                 key={i}
                 href={social.url}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="tap-feedback w-11 h-11 bg-zinc-900 border border-zinc-800 rounded-full flex items-center justify-center text-white"
+                className="w-11 h-11 rounded-full border border-white/20 flex items-center justify-center text-white"
                 title={social.label}
+                onClick={() => flash(`social-${i}`)}
+                style={tapStyle(`social-${i}`)}
               >
                 <SocialIcon type={social.type} />
               </a>
@@ -225,10 +336,30 @@ export default function CardClient({ rep, company }: { rep: RepData; company: Co
           </div>
         )}
 
-        {/* Share Button */}
-        <div className="flex justify-center mb-8 fade-in" style={{ animationDelay: `${shareDelay}ms` }}>
+        {/* ─── 6. ACTION BUTTONS ─── */}
+        <div className="px-6 mt-8 space-y-3" style={sectionStyle(actionsIdx)}>
+          {/* Save Contact — Primary */}
+          <button
+            onClick={() => {
+              flash('save');
+              handleSaveContact();
+            }}
+            className="w-full py-3.5 rounded-[14px] text-white font-outfit font-bold text-base flex items-center justify-center gap-2"
+            style={{
+              background: 'linear-gradient(135deg, #00AEEF, #0088CC)',
+              ...buttonTapStyle('save'),
+            }}
+          >
+            <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+            </svg>
+            Save Contact
+          </button>
+
+          {/* Share Card — Secondary */}
           <button
             onClick={async () => {
+              flash('share');
               const url = window.location.href;
               const title = `${rep.firstName} ${rep.lastName}`;
               if (navigator.share) {
@@ -243,22 +374,21 @@ export default function CardClient({ rep, company }: { rep: RepData; company: Co
                 setTimeout(() => setShareFeedback(''), 2000);
               }
             }}
-            className="tap-feedback text-sm rounded-full border border-gray-600 text-gray-400 px-6 py-2"
+            className="w-full py-3.5 rounded-[14px] border border-spoton-blue text-white font-outfit font-semibold text-sm flex items-center justify-center gap-2 bg-transparent"
+            style={buttonTapStyle('share')}
           >
-            {shareFeedback || 'Share my card'}
+            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z" />
+            </svg>
+            {shareFeedback || 'Share Card'}
           </button>
         </div>
 
-        {/* Bio */}
-        {rep.bio && (
-          <div className="mb-8 text-center fade-in" style={{ animationDelay: `${shareDelay + 50}ms` }}>
-            <p className="text-zinc-400 text-sm leading-relaxed">{rep.bio}</p>
-          </div>
-        )}
-
-        {/* Edit link */}
-        <div className="text-center pb-4">
-          <a href="/login" className="text-xs text-gray-600">Edit your card</a>
+        {/* ─── 7. FOOTER ─── */}
+        <div className="text-center py-8" style={sectionStyle(footerIdx)}>
+          <a href="/login" className="text-xs text-zinc-600">
+            Edit your card
+          </a>
         </div>
 
       </div>
