@@ -26,12 +26,37 @@ async function main() {
 
   console.log('Created company settings:', company.companyName);
 
-  // Create admin user
-  const admin = await prisma.rep.upsert({
+  // Create standalone admin account (no public card)
+  await prisma.rep.upsert({
     where: { email: 'admin@spotonroof.com' },
     update: {},
     create: {
       email: 'admin@spotonroof.com',
+      firstName: 'Admin',
+      lastName: 'SpotOnRoof',
+      slug: 'admin',
+      role: 'admin',
+      isActive: false,
+    },
+  });
+
+  await prisma.user.upsert({
+    where: { email: 'admin@spotonroof.com' },
+    update: {},
+    create: {
+      email: 'admin@spotonroof.com',
+      name: 'Admin',
+    },
+  });
+
+  console.log('Created standalone admin: admin@spotonroof.com');
+
+  // Create Brack Dillon rep card (linked to brack@spotonroof.com)
+  const brack = await prisma.rep.upsert({
+    where: { email: 'brack@spotonroof.com' },
+    update: {},
+    create: {
+      email: 'brack@spotonroof.com',
       firstName: 'Brack',
       lastName: 'Dillon',
       slug: 'brack-dillon',
@@ -42,17 +67,16 @@ async function main() {
     },
   });
 
-  console.log('Created admin:', admin.firstName, admin.lastName);
-
-  // Create NextAuth User record for admin
   await prisma.user.upsert({
-    where: { email: 'admin@spotonroof.com' },
+    where: { email: 'brack@spotonroof.com' },
     update: {},
     create: {
-      email: 'admin@spotonroof.com',
+      email: 'brack@spotonroof.com',
       name: 'Brack Dillon',
     },
   });
+
+  console.log('Created rep:', brack.firstName, brack.lastName, '(brack@spotonroof.com)');
 
   // Create sample rep
   const rep = await prisma.rep.upsert({
@@ -73,7 +97,7 @@ async function main() {
 
   console.log('Created rep:', rep.firstName, rep.lastName);
 
-  // Create NextAuth User record for rep
+  // Create NextAuth User records for reps
   await prisma.user.upsert({
     where: { email: 'jane@spotonroof.com' },
     update: {},

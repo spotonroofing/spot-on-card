@@ -256,6 +256,11 @@ export default function CardClient({ rep, company }: { rep: RepData; company: Co
           </div>
         )}
 
+        {/* Edit link */}
+        <div className="text-center pb-4">
+          <a href="/login" className="text-xs text-gray-600">Edit your card</a>
+        </div>
+
       </div>
     </div>
   );
