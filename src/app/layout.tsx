@@ -6,8 +6,8 @@ import Providers from './providers';
 const inter = Inter({ subsets: ['latin'] });
 
 export const metadata: Metadata = {
-  title: 'SpotOnRoof - Digital Business Card',
-  description: 'Digital business cards for SpotOnRoof sales representatives',
+  title: 'SpotOn Card',
+  description: 'Digital business cards for SpotOnRoof',
 };
 
 export default function RootLayout({

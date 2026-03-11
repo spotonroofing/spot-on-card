@@ -1,6 +1,7 @@
 export default function NotFound() {
   return (
     <div className="min-h-screen bg-black flex items-center justify-center px-4">
+      <title>Not Found | SpotOn Card</title>
       <div className="text-center">
         <img src="/images/logo-white.png" alt="SpotOnRoof" style={{ maxWidth: 200 }} className="mx-auto mb-6" />
         <h1 className="text-2xl font-bold text-white mb-2">Page not found</h1>

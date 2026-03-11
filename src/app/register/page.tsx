@@ -73,7 +73,7 @@ export default function RegisterPage() {
         <Logo />
         <div className="mt-8 bg-zinc-900 rounded-2xl p-8 border border-zinc-800">
           <h2 className="text-xl font-bold text-white mb-2">Create your card</h2>
-          <p className="text-zinc-400 mb-6">Register to get your SpotOnRoof digital business card</p>
+          <p className="text-zinc-400 mb-6">Register to get your SpotOn Card</p>
 
           <form onSubmit={handleSubmit} className="space-y-4 text-left">
             <div className="grid grid-cols-2 gap-3">

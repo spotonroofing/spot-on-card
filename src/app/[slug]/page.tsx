@@ -13,14 +13,14 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     const rep = await prisma.rep.findUnique({ where: { slug } });
 
     if (!rep) {
-      return { title: 'Card Not Found' };
+      return { title: 'Not Found | SpotOn Card' };
     }
 
     return {
-      title: `${rep.firstName} ${rep.lastName} - SpotOnRoof`,
+      title: `${rep.firstName} ${rep.lastName} | SpotOnRoof`,
       description: `${rep.firstName} ${rep.lastName}, ${rep.jobTitle || 'Sales Representative'} at SpotOnRoof. Save my contact info.`,
       openGraph: {
-        title: `${rep.firstName} ${rep.lastName} - SpotOnRoof`,
+        title: `${rep.firstName} ${rep.lastName} | SpotOnRoof`,
         description: `${rep.jobTitle || 'Sales Representative'} at SpotOnRoof`,
         type: 'profile',
         ...(rep.profilePhoto && {
@@ -29,7 +29,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       },
     };
   } catch {
-    return { title: 'SpotOnRoof - Digital Business Card' };
+    return { title: 'SpotOn Card' };
   }
 }
 
