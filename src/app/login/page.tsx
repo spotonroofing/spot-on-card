@@ -87,7 +87,7 @@ function LoginForm() {
             <button
               type="submit"
               disabled={loading}
-              className="w-full py-3 bg-gradient-to-r from-teal-start to-teal-end text-white font-semibold rounded-lg hover:opacity-90 transition-opacity disabled:opacity-50"
+              className="w-full py-3 bg-gradient-to-r from-[#00AEEF] to-[#0077A8] text-white font-semibold rounded-lg hover:opacity-90 transition-opacity disabled:opacity-50"
             >
               {loading ? 'Sending...' : 'Send Magic Link'}
             </button>
@@ -107,11 +107,7 @@ function LoginForm() {
 
 function Logo() {
   return (
-    <div className="text-3xl font-bold">
-      <span className="text-white">Spot</span>
-      <span className="text-spoton-blue">On</span>
-      <span className="text-white">Roof</span>
-    </div>
+    <img src="/images/logo-white.png" alt="SpotOnRoof" style={{ maxWidth: 200 }} className="mx-auto" />
   );
 }
 

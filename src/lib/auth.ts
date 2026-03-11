@@ -13,6 +13,8 @@ function getResend() {
 
 export const { handlers, signIn, signOut, auth } = NextAuth({
   adapter: PrismaAdapter(prisma) as any,
+  secret: process.env.NEXTAUTH_SECRET || process.env.AUTH_SECRET,
+  trustHost: true,
   providers: [
     EmailProvider({
       server: { host: '', port: 0, auth: { user: '', pass: '' } },
@@ -26,11 +28,9 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
             html: `
               <div style="background-color: #000; padding: 40px; font-family: Arial, sans-serif;">
                 <div style="max-width: 400px; margin: 0 auto; text-align: center;">
-                  <h1 style="color: #fff; margin-bottom: 8px;">
-                    <span>Spot</span><span style="color: #00AEEF;">On</span><span>Roof</span>
-                  </h1>
+                  <img src="https://spot-on-card-production.up.railway.app/images/logo-white.png" alt="SpotOnRoof" style="max-width: 180px; margin: 0 auto 8px;" />
                   <p style="color: #ccc; margin-bottom: 24px;">Click the button below to sign in to your digital business card.</p>
-                  <a href="${url}" style="display: inline-block; background: linear-gradient(135deg, #0A7E8C, #004E5A); color: #fff; padding: 14px 32px; border-radius: 8px; text-decoration: none; font-weight: bold;">
+                  <a href="${url}" style="display: inline-block; background: linear-gradient(135deg, #00AEEF, #0077A8); color: #fff; padding: 14px 32px; border-radius: 8px; text-decoration: none; font-weight: bold;">
                     Sign In
                   </a>
                   <p style="color: #666; font-size: 12px; margin-top: 24px;">This link expires in 24 hours. If you didn't request this, you can ignore this email.</p>
@@ -49,6 +49,13 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
     strategy: 'jwt',
   },
   callbacks: {
+    async redirect({ url, baseUrl }) {
+      // Allow relative URLs
+      if (url.startsWith('/')) return `${baseUrl}${url}`;
+      // Allow same-origin URLs
+      if (url.startsWith(baseUrl)) return url;
+      return baseUrl;
+    },
     async jwt({ token, user }) {
       if (user?.email) {
         const rep = await prisma.rep.findUnique({
