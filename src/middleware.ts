@@ -7,7 +7,11 @@ export async function middleware(req: NextRequest) {
 
   // Protect /edit and /admin routes
   if (pathname === '/edit' || pathname.startsWith('/admin')) {
-    const token = await getToken({ req, secret: process.env.NEXTAUTH_SECRET || process.env.AUTH_SECRET });
+    const token = await getToken({
+      req,
+      secret: process.env.NEXTAUTH_SECRET || process.env.AUTH_SECRET,
+      cookieName: 'next-auth.session-token',
+    });
 
     if (!token) {
       const loginUrl = new URL('/login', req.url);
