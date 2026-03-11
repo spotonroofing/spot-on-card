@@ -9,8 +9,6 @@ module.exports = {
     extend: {
       colors: {
         'spoton-blue': '#00AEEF',
-        'teal-start': '#0A7E8C',
-        'teal-end': '#004E5A',
       },
     },
   },

@@ -147,11 +147,7 @@ export default function AdminPage() {
       <header className="border-b border-zinc-800 px-4 py-4">
         <div className="max-w-6xl mx-auto flex items-center justify-between">
           <div className="flex items-center gap-4">
-            <div className="text-xl font-bold">
-              <span className="text-white">Spot</span>
-              <span className="text-spoton-blue">On</span>
-              <span className="text-white">Roof</span>
-            </div>
+            <img src="/images/logo-white.png" alt="SpotOnRoof" className="h-auto" style={{ maxWidth: '200px' }} />
             <span className="text-xs text-zinc-500 bg-zinc-800 px-2 py-1 rounded">Admin</span>
           </div>
           <div className="flex items-center gap-4">
@@ -195,7 +191,7 @@ export default function AdminPage() {
               <h2 className="text-lg font-bold text-white">Sales Reps ({reps.length})</h2>
               <button
                 onClick={() => { setShowAddRep(true); setEditingRep(null); }}
-                className="px-4 py-2 bg-gradient-to-r from-teal-start to-teal-end text-white text-sm font-semibold rounded-lg hover:opacity-90"
+                className="px-4 py-2 bg-gradient-to-r from-[#00AEEF] to-[#0077A8] text-white text-sm font-semibold rounded-lg hover:opacity-90"
               >
                 + Add New Rep
               </button>
@@ -538,7 +534,7 @@ function RepForm({
             <button type="button" onClick={onClose} className="flex-1 py-2.5 bg-zinc-800 text-zinc-300 rounded-lg text-sm hover:bg-zinc-700">
               Cancel
             </button>
-            <button type="submit" disabled={saving} className="flex-1 py-2.5 bg-gradient-to-r from-teal-start to-teal-end text-white font-semibold rounded-lg text-sm hover:opacity-90 disabled:opacity-50">
+            <button type="submit" disabled={saving} className="flex-1 py-2.5 bg-gradient-to-r from-[#00AEEF] to-[#0077A8] text-white font-semibold rounded-lg text-sm hover:opacity-90 disabled:opacity-50">
               {saving ? 'Saving...' : (rep ? 'Update Rep' : 'Create Rep')}
             </button>
           </div>
@@ -642,7 +638,7 @@ function SettingsForm({
         </div>
       </div>
 
-      <button type="submit" disabled={saving} className="w-full py-2.5 bg-gradient-to-r from-teal-start to-teal-end text-white font-semibold rounded-lg text-sm hover:opacity-90 disabled:opacity-50">
+      <button type="submit" disabled={saving} className="w-full py-2.5 bg-gradient-to-r from-[#00AEEF] to-[#0077A8] text-white font-semibold rounded-lg text-sm hover:opacity-90 disabled:opacity-50">
         {saving ? 'Saving...' : 'Save Settings'}
       </button>
     </form>

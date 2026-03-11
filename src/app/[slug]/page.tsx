@@ -43,11 +43,7 @@ export default async function CardPage({ params }: Props) {
     return (
       <div className="min-h-screen bg-black flex items-center justify-center px-4">
         <div className="text-center">
-          <div className="text-3xl font-bold mb-4">
-            <span className="text-white">Spot</span>
-            <span className="text-spoton-blue">On</span>
-            <span className="text-white">Roof</span>
-          </div>
+          <img src="/images/logo-white.png" alt="SpotOnRoof" className="mx-auto mb-4 h-auto" style={{ maxWidth: '200px' }} />
           <p className="text-zinc-400 text-lg">Service temporarily unavailable. Please try again later.</p>
           <a href="https://spotonroof.com" className="text-spoton-blue hover:underline mt-4 inline-block">
             Visit spotonroof.com
@@ -65,11 +61,7 @@ export default async function CardPage({ params }: Props) {
     return (
       <div className="min-h-screen bg-black flex items-center justify-center px-4">
         <div className="text-center">
-          <div className="text-3xl font-bold mb-4">
-            <span className="text-white">Spot</span>
-            <span className="text-spoton-blue">On</span>
-            <span className="text-white">Roof</span>
-          </div>
+          <img src="/images/logo-white.png" alt="SpotOnRoof" className="mx-auto mb-4 h-auto" style={{ maxWidth: '200px' }} />
           <p className="text-zinc-400 text-lg">This card is no longer active.</p>
           <a href="https://spotonroof.com" className="text-spoton-blue hover:underline mt-4 inline-block">
             Visit spotonroof.com

@@ -201,11 +201,7 @@ export default function EditPage() {
       {/* Header */}
       <header className="border-b border-zinc-800 px-4 py-4">
         <div className="max-w-2xl mx-auto flex items-center justify-between">
-          <div className="text-xl font-bold">
-            <span className="text-white">Spot</span>
-            <span className="text-spoton-blue">On</span>
-            <span className="text-white">Roof</span>
-          </div>
+          <img src="/images/logo-white.png" alt="SpotOnRoof" className="h-auto" style={{ maxWidth: '200px' }} />
           <div className="flex items-center gap-4">
             {rep.role === 'admin' && (
               <a href="/admin" className="text-sm text-spoton-blue hover:underline">
@@ -415,7 +411,7 @@ export default function EditPage() {
           <button
             type="submit"
             disabled={saving}
-            className="w-full py-3 bg-gradient-to-r from-teal-start to-teal-end text-white font-semibold rounded-lg hover:opacity-90 transition-opacity disabled:opacity-50"
+            className="w-full py-3 bg-gradient-to-r from-[#00AEEF] to-[#0077A8] text-white font-semibold rounded-lg hover:opacity-90 transition-opacity disabled:opacity-50"
           >
             {saving ? 'Saving...' : 'Save Changes'}
           </button>
