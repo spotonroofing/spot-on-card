@@ -74,6 +74,7 @@ model CompanySettings {
   companyFacebook     String?
   companyLinkedIn     String?
   companyTikTok       String?
+  reviewLink          String?
   inviteCode          String
   brandPrimaryColor   String   @default("#00AEEF")
   brandSecondaryColor String   @default("#0A7E8C")

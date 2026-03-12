@@ -37,6 +37,7 @@ interface CompanySettings {
   companyFacebook: string | null;
   companyLinkedIn: string | null;
   companyTikTok: string | null;
+  reviewLink: string | null;
   inviteCode: string;
   brandPrimaryColor: string;
   brandSecondaryColor: string;
@@ -629,6 +630,12 @@ function SettingsForm({
             </div>
           ))}
         </div>
+      </div>
+
+      <div>
+        <label className="block text-xs text-zinc-400 mb-1">Review Link</label>
+        <input type="url" value={form.reviewLink || ''} onChange={(e) => setForm({ ...form, reviewLink: e.target.value })} placeholder="https://review.spotonroofing.com/" className={inputClass} />
+        <p className="text-xs text-zinc-600 mt-1">URL for the &quot;Leave a Review&quot; button on card pages</p>
       </div>
 
       <div className="border-t border-zinc-800 pt-4">

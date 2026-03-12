@@ -28,6 +28,7 @@ interface CompanyData {
   companyFacebook: string | null;
   companyLinkedIn: string | null;
   companyTikTok: string | null;
+  reviewLink: string | null;
 }
 
 export default function CardClient({ rep, company }: { rep: RepData; company: CompanyData | null }) {
@@ -319,7 +320,7 @@ export default function CardClient({ rep, company }: { rep: RepData; company: Co
 
           {/* Leave a Review row */}
           <a
-            href="https://placeholder-review-link.com"
+            href={company?.reviewLink || 'https://review.spotonroofing.com/'}
             target="_blank"
             rel="noopener noreferrer"
             className="flex items-center gap-3 py-1.5 rounded-xl"
