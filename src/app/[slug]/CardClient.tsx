@@ -172,7 +172,7 @@ export default function CardClient({ rep, company }: { rep: RepData; company: Co
           <img
             src="/images/logo-white.png"
             alt=""
-            className="absolute top-4 right-4 h-8 opacity-20 pointer-events-none"
+            className="absolute top-4 right-4 h-8 pointer-events-none drop-shadow-[0_2px_8px_rgba(0,0,0,0.7)]"
           />
         </div>
 
