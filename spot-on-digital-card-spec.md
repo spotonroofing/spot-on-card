@@ -122,7 +122,6 @@ These fields are **locked** — reps cannot change them. They appear on every ca
 | `companyFacebook` | string (URL) | Facebook page URL |
 | `companyLinkedIn` | string (URL, optional) | LinkedIn page URL |
 | `companyTikTok` | string (URL, optional) | TikTok page URL |
-| `companyYouTube` | string (URL, optional) | YouTube page URL |
 | `inviteCode` | string | Code reps use to self-register |
 | `brandPrimaryColor` | string (hex) | Primary brand color |
 | `brandSecondaryColor` | string (hex) | Secondary brand color |

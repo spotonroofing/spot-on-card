@@ -145,7 +145,7 @@ export default function CardClient({ rep, company }: { rep: RepData; company: Co
       <div className="w-full max-w-md mx-auto">
 
         {/* ─── 1. HERO PHOTO ─── */}
-        <div className="relative w-full" style={{ ...sectionStyle(heroIdx), height: '45vh' }}>
+        <div className="relative w-full" style={{ ...sectionStyle(heroIdx), height: 'calc(50vh + env(safe-area-inset-top, 0px))' }}>
           {rep.profilePhoto && rep.profilePhoto.trim() !== '' && !photoError ? (
             <img
               src={rep.profilePhoto}
