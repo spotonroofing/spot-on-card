@@ -95,15 +95,12 @@ export default function CardClient({ rep, company }: { rep: RepData; company: Co
   let sectionIndex = 0;
   const heroIdx = sectionIndex++;
   const nameIdx = sectionIndex++;
-  const titleIdx = rep.jobTitle ? sectionIndex++ : -1;
   const quoteIdx = rep.bio ? sectionIndex++ : -1;
   const phoneIdx = hasPhone ? sectionIndex++ : -1;
   const emailIdx = rep.email ? sectionIndex++ : -1;
   const addressIdx = company?.companyAddress ? sectionIndex++ : -1;
   const websiteIdx = company?.companyWebsite ? sectionIndex++ : -1;
   const reviewIdx = sectionIndex++;
-  const saveIdx = sectionIndex++;
-  const shareIdx = sectionIndex++;
   const socialsIdx = socials.length > 0 ? sectionIndex++ : -1;
   const footerIdx = sectionIndex++;
 
@@ -168,23 +165,55 @@ export default function CardClient({ rep, company }: { rep: RepData; company: Co
         </div>
 
         {/* ─── 2. NAME BLOCK ─── */}
-        <div className="px-6 -mt-10 relative z-10" style={sectionStyle(nameIdx)}>
-          <h1 className="font-outfit uppercase tracking-[0.2em]">
-            <span className="block text-3xl font-light text-white" style={{ lineHeight: '0.95' }}>
-              {rep.firstName}
-            </span>
-            <span className="block text-4xl font-extrabold text-white" style={{ lineHeight: '0.95' }}>
-              {rep.lastName}
-            </span>
-          </h1>
-          {rep.jobTitle && (
-            <p
-              className="text-spoton-blue text-xs uppercase tracking-[0.15em] font-outfit font-semibold mt-1"
-              style={titleIdx >= 0 ? sectionStyle(titleIdx) : undefined}
+        <div className="px-6 -mt-10 relative z-10 flex items-start justify-between gap-3" style={sectionStyle(nameIdx)}>
+          <div>
+            <h1 className="font-outfit uppercase tracking-[0.2em]">
+              <span className="block text-3xl font-light text-white" style={{ lineHeight: '0.95' }}>
+                {rep.firstName}
+              </span>
+              <span className="block text-4xl font-extrabold text-white" style={{ lineHeight: '0.95' }}>
+                {rep.lastName}
+              </span>
+            </h1>
+            {rep.jobTitle && (
+              <p className="text-spoton-blue text-xs uppercase tracking-[0.15em] font-outfit font-semibold mt-1">
+                {rep.jobTitle}
+              </p>
+            )}
+          </div>
+          <div className="flex flex-col gap-1.5 flex-shrink-0 mt-1">
+            <button
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-spoton-blue/10 border border-spoton-blue/20 text-white text-xs font-medium whitespace-nowrap"
+              onClick={() => { flash('save'); handleSaveContact(); }}
+              style={tapStyle('save')}
             >
-              {rep.jobTitle}
-            </p>
-          )}
+              <svg className="w-3.5 h-3.5 text-spoton-blue flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z" />
+              </svg>
+              Save Contact
+            </button>
+            <button
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-spoton-blue/10 border border-spoton-blue/20 text-white text-xs font-medium whitespace-nowrap"
+              onClick={async () => {
+                flash('share');
+                const url = window.location.href;
+                const title = `${rep.firstName} ${rep.lastName}`;
+                if (navigator.share) {
+                  try { await navigator.share({ title, url }); } catch {}
+                } else {
+                  await navigator.clipboard.writeText(url);
+                  setShareFeedback('Copied!');
+                  setTimeout(() => setShareFeedback(''), 2000);
+                }
+              }}
+              style={tapStyle('share')}
+            >
+              <svg className="w-3.5 h-3.5 text-spoton-blue flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z" />
+              </svg>
+              {shareFeedback || 'Share Card'}
+            </button>
+          </div>
         </div>
 
         {/* ─── 3. DIVIDER + QUOTE ─── */}
@@ -322,48 +351,6 @@ export default function CardClient({ rep, company }: { rep: RepData; company: Co
             </div>
           </a>
 
-          {/* Save Contact row */}
-          <button
-            className="flex items-center gap-3 py-1.5 rounded-xl w-full text-left"
-            onClick={() => { flash('save'); handleSaveContact(); }}
-            style={{ ...sectionStyle(saveIdx), ...tapStyle('save') }}
-          >
-            <div className="w-10 h-10 rounded-lg bg-spoton-blue/10 border border-spoton-blue/20 flex items-center justify-center flex-shrink-0">
-              <svg className="w-5 h-5 text-spoton-blue" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z" />
-              </svg>
-            </div>
-            <div className="flex-1 min-w-0">
-              <span className="text-white text-sm block">Save Contact</span>
-            </div>
-          </button>
-
-          {/* Share Card row */}
-          <button
-            className="flex items-center gap-3 py-1.5 rounded-xl w-full text-left"
-            onClick={async () => {
-              flash('share');
-              const url = window.location.href;
-              const title = `${rep.firstName} ${rep.lastName}`;
-              if (navigator.share) {
-                try { await navigator.share({ title, url }); } catch {}
-              } else {
-                await navigator.clipboard.writeText(url);
-                setShareFeedback('Copied!');
-                setTimeout(() => setShareFeedback(''), 2000);
-              }
-            }}
-            style={{ ...sectionStyle(shareIdx), ...tapStyle('share') }}
-          >
-            <div className="w-10 h-10 rounded-lg bg-spoton-blue/10 border border-spoton-blue/20 flex items-center justify-center flex-shrink-0">
-              <svg className="w-5 h-5 text-spoton-blue" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z" />
-              </svg>
-            </div>
-            <div className="flex-1 min-w-0">
-              <span className="text-white text-sm block">{shareFeedback || 'Share Card'}</span>
-            </div>
-          </button>
         </div>
 
         {/* ─── 5. SOCIAL ICONS ─── */}
