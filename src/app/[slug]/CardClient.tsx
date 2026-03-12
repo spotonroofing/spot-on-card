@@ -152,12 +152,13 @@ export default function CardClient({ rep, company }: { rep: RepData; company: Co
               onError={() => setPhotoError(true)}
             />
           ) : (
-            <div className="w-full h-full bg-gradient-to-b from-card-surface to-card-bg flex items-center justify-center">
-              <div className="w-28 h-28 rounded-full bg-card-bg border border-white/10 flex items-center justify-center">
-                <span className="text-4xl font-outfit font-bold text-spoton-blue">
-                  {rep.firstName[0]}{rep.lastName[0]}
-                </span>
-              </div>
+            <div
+              className="w-full h-full flex items-center justify-center"
+              style={{ background: 'linear-gradient(to bottom, #1a1a1a, #111111)' }}
+            >
+              <span className="text-7xl font-outfit font-bold text-spoton-blue">
+                {rep.firstName[0]}{rep.lastName[0]}
+              </span>
             </div>
           )}
 
