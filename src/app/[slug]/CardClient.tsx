@@ -37,10 +37,13 @@ export default function CardClient({ rep, company }: { rep: RepData; company: Co
   const [tapped, setTapped] = useState<string | null>(null);
   const [photoError, setPhotoError] = useState(false);
 
-  // Trigger entrance animations after mount
+  // Trigger entrance animations after mount, then clean up transforms
+  const [animDone, setAnimDone] = useState(false);
   useEffect(() => {
     const t = setTimeout(() => setLoaded(true), 50);
-    return () => clearTimeout(t);
+    // After all staggered animations finish, mark done so no residual transitions remain
+    const t2 = setTimeout(() => setAnimDone(true), 1200);
+    return () => { clearTimeout(t); clearTimeout(t2); };
   }, []);
 
   // Log card_view on mount
@@ -109,41 +112,46 @@ export default function CardClient({ rep, company }: { rep: RepData; company: Co
 
   function sectionStyle(idx: number) {
     const delay = idx * 80; // 80ms stagger
+    if (animDone) return {};
+    if (loaded) return {
+      opacity: 1,
+      transform: 'none',
+      transition: `opacity 0.5s ease-out ${delay}ms, transform 0.5s ease-out ${delay}ms`,
+    };
     return {
-      opacity: loaded ? 1 : 0,
-      transform: loaded ? 'translateY(0)' : 'translateY(20px)',
+      opacity: 0,
+      transform: 'translateY(20px)',
       transition: `opacity 0.5s ease-out ${delay}ms, transform 0.5s ease-out ${delay}ms`,
     };
   }
 
-  // Tap style helper — returns inline style for tapped state
+  // Tap style helper — only applies transform when actively tapped (no persistent transforms)
   function tapStyle(key: string): React.CSSProperties {
-    const active = tapped === key;
+    if (tapped !== key) return {};
     return {
-      transition: 'transform 200ms ease, background-color 200ms ease',
-      transform: active ? 'scale(0.96)' : 'scale(1)',
-      backgroundColor: active ? 'rgba(0, 174, 239, 0.08)' : 'transparent',
+      transform: 'scale(0.96)',
+      backgroundColor: 'rgba(0, 174, 239, 0.08)',
     };
   }
 
   function buttonTapStyle(key: string): React.CSSProperties {
-    const active = tapped === key;
+    if (tapped !== key) return {};
     return {
-      transition: 'transform 200ms ease, filter 200ms ease',
-      transform: active ? 'scale(0.95)' : 'scale(1)',
-      filter: active ? 'brightness(0.85)' : 'brightness(1)',
+      transform: 'scale(0.95)',
+      filter: 'brightness(0.85)',
     };
   }
 
   return (
-    <div className="min-h-screen bg-card-bg flex flex-col items-center font-sans">
+    <div className="bg-card-bg flex flex-col items-center font-sans" style={{ minHeight: '100dvh', overflowX: 'hidden' }}>
       <style>{`
         * { -webkit-tap-highlight-color: transparent; }
+        html, body { overflow-x: hidden; width: 100%; }
       `}</style>
       <div className="w-full max-w-md mx-auto">
 
         {/* ─── 1. HERO PHOTO ─── */}
-        <div className="relative w-full" style={{ ...sectionStyle(heroIdx), height: '45vh' }}>
+        <div className="relative w-full" style={{ ...sectionStyle(heroIdx), height: '35vh' }}>
           {rep.profilePhoto && rep.profilePhoto.trim() !== '' && !photoError ? (
             <img
               src={rep.profilePhoto}
@@ -179,16 +187,16 @@ export default function CardClient({ rep, company }: { rep: RepData; company: Co
         {/* ─── 2. NAME BLOCK ─── */}
         <div className="px-6 -mt-16 relative z-10" style={sectionStyle(nameIdx)}>
           <h1 className="font-outfit uppercase tracking-[0.2em]">
-            <span className="block text-3xl font-light text-white leading-tight">
+            <span className="block text-3xl font-light text-white" style={{ lineHeight: '0.95' }}>
               {rep.firstName}
             </span>
-            <span className="block text-4xl font-extrabold text-white leading-tight">
+            <span className="block text-4xl font-extrabold text-white" style={{ lineHeight: '0.95' }}>
               {rep.lastName}
             </span>
           </h1>
           {rep.jobTitle && (
             <p
-              className="text-spoton-blue text-xs uppercase tracking-[0.15em] font-outfit font-semibold mt-2"
+              className="text-spoton-blue text-xs uppercase tracking-[0.15em] font-outfit font-semibold mt-1"
               style={titleIdx >= 0 ? sectionStyle(titleIdx) : undefined}
             >
               {rep.jobTitle}
@@ -198,9 +206,9 @@ export default function CardClient({ rep, company }: { rep: RepData; company: Co
 
         {/* ─── 3. DIVIDER + QUOTE ─── */}
         {rep.bio && (
-          <div className="px-6 mt-6" style={quoteIdx >= 0 ? sectionStyle(quoteIdx) : undefined}>
+          <div className="px-6 mt-3" style={quoteIdx >= 0 ? sectionStyle(quoteIdx) : undefined}>
             <div
-              className="h-px w-full mb-4"
+              className="h-px w-full mb-2"
               style={{ background: 'linear-gradient(to right, transparent, #00AEEF, transparent)' }}
             />
             <p className="text-zinc-400 text-sm italic leading-relaxed">
@@ -210,12 +218,12 @@ export default function CardClient({ rep, company }: { rep: RepData; company: Co
         )}
 
         {/* ─── 4. CONTACT ROWS ─── */}
-        <div className="px-6 mt-6 space-y-2">
+        <div className="px-6 mt-3 space-y-1">
 
           {/* Phone row (compound: Mobile + Office) */}
           {hasPhone && (
             <div
-              className="flex items-start gap-3 py-2 rounded-xl"
+              className="flex items-start gap-3 py-1.5 rounded-xl"
               style={{ ...sectionStyle(phoneIdx), ...tapStyle('phone') }}
             >
               <div className="w-10 h-10 rounded-lg bg-spoton-blue/10 border border-spoton-blue/20 flex items-center justify-center flex-shrink-0 mt-0.5">
@@ -254,7 +262,7 @@ export default function CardClient({ rep, company }: { rep: RepData; company: Co
           {rep.email && (
             <a
               href={`mailto:${rep.email}`}
-              className="flex items-center gap-3 py-2 rounded-xl block"
+              className="flex items-center gap-3 py-1.5 rounded-xl block"
               onClick={() => flash('email')}
               style={{ ...sectionStyle(emailIdx), ...tapStyle('email') }}
             >
@@ -276,7 +284,7 @@ export default function CardClient({ rep, company }: { rep: RepData; company: Co
               href={mapsUrl!}
               target="_blank"
               rel="noopener noreferrer"
-              className="flex items-center gap-3 py-2 rounded-xl block"
+              className="flex items-center gap-3 py-1.5 rounded-xl block"
               onClick={() => flash('address')}
               style={{ ...sectionStyle(addressIdx), ...tapStyle('address') }}
             >
@@ -299,7 +307,7 @@ export default function CardClient({ rep, company }: { rep: RepData; company: Co
               href={company.companyWebsite}
               target="_blank"
               rel="noopener noreferrer"
-              className="flex items-center gap-3 py-2 rounded-xl block"
+              className="flex items-center gap-3 py-1.5 rounded-xl block"
               onClick={() => flash('website')}
               style={{ ...sectionStyle(websiteIdx), ...tapStyle('website') }}
             >
@@ -319,7 +327,7 @@ export default function CardClient({ rep, company }: { rep: RepData; company: Co
         {/* ─── 5. SOCIAL ICONS ─── */}
         {socials.length > 0 && (
           <div
-            className="flex justify-center gap-3 px-6 mt-6"
+            className="flex justify-center gap-3 px-6 mt-3"
             style={socialsIdx >= 0 ? sectionStyle(socialsIdx) : undefined}
           >
             {socials.map((social, i) => (
@@ -340,14 +348,14 @@ export default function CardClient({ rep, company }: { rep: RepData; company: Co
         )}
 
         {/* ─── 6. ACTION BUTTONS ─── */}
-        <div className="px-6 mt-8 space-y-3" style={sectionStyle(actionsIdx)}>
+        <div className="px-6 mt-4 space-y-2" style={sectionStyle(actionsIdx)}>
           {/* Save Contact — Primary */}
           <button
             onClick={() => {
               flash('save');
               handleSaveContact();
             }}
-            className="w-full py-3.5 rounded-[14px] text-white font-outfit font-bold text-base flex items-center justify-center gap-2"
+            className="w-full py-3 rounded-[14px] text-white font-outfit font-bold text-base flex items-center justify-center gap-2"
             style={{
               background: 'linear-gradient(135deg, #00AEEF, #0088CC)',
               ...buttonTapStyle('save'),
@@ -377,7 +385,7 @@ export default function CardClient({ rep, company }: { rep: RepData; company: Co
                 setTimeout(() => setShareFeedback(''), 2000);
               }
             }}
-            className="w-full py-3.5 rounded-[14px] border border-spoton-blue text-white font-outfit font-semibold text-sm flex items-center justify-center gap-2 bg-transparent"
+            className="w-full py-3 rounded-[14px] border border-spoton-blue text-white font-outfit font-semibold text-sm flex items-center justify-center gap-2 bg-transparent"
             style={buttonTapStyle('share')}
           >
             <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -388,7 +396,7 @@ export default function CardClient({ rep, company }: { rep: RepData; company: Co
         </div>
 
         {/* ─── 7. FOOTER ─── */}
-        <div className="text-center py-8" style={sectionStyle(footerIdx)}>
+        <div className="text-center py-4" style={sectionStyle(footerIdx)}>
           <a href="/login" className="text-xs text-zinc-600">
             Edit your card
           </a>
