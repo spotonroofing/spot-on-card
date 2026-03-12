@@ -17,6 +17,7 @@ interface RosterEntry {
 const ADMIN_EMAILS = new Set([
   'brack@spotonroof.com',
   'jarrod@spotonroof.com',
+  'admin@spotonroof.com',
 ]);
 
 const roster: RosterEntry[] = [
@@ -60,14 +61,7 @@ function roleFor(email: string): Role {
 // ── main ─────────────────────────────────────────────────────────────
 
 async function main() {
-  // Guard: skip if roster is already seeded (safe to run on every deploy)
-  const existingCount = await prisma.rep.count();
-  if (existingCount >= 18) {
-    console.log('Roster already seeded, skipping');
-    return;
-  }
-
-  console.log(`Seeding ${roster.length} rep+user pairs…\n`);
+  console.log(`Upserting ${roster.length} rep+user pairs…\n`);
 
   for (const entry of roster) {
     const slug = toSlug(entry.firstName, entry.lastName);
