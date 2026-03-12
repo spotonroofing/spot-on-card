@@ -333,6 +333,7 @@ export default function CardClient({ rep, company }: { rep: RepData; company: Co
               </svg>
             </div>
             <div className="flex-1 min-w-0">
+              <span className="text-zinc-500 text-xs uppercase tracking-wider block">Feedback</span>
               <span className="text-white text-sm block">Leave a Review</span>
             </div>
           </a>
@@ -342,17 +343,17 @@ export default function CardClient({ rep, company }: { rep: RepData; company: Co
         {/* ─── 5. SAVE CONTACT & SHARE CARD ─── */}
         <div className="px-6 mt-3 grid grid-cols-2 gap-3" style={sectionStyle(buttonsIdx)}>
           <button
-            className="flex items-center justify-center gap-2 py-3 rounded-lg bg-spoton-blue/10 border border-spoton-blue/20 text-white text-sm font-medium"
+            className="flex items-center justify-center gap-2 py-3 rounded-lg bg-white/10 border border-white/20 text-zinc-200 text-sm font-medium"
             onClick={() => { flash('save'); handleSaveContact(); }}
             style={tapStyle('save')}
           >
-            <svg className="w-4 h-4 text-spoton-blue flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <svg className="w-4 h-4 text-zinc-300 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z" />
             </svg>
             Save Contact
           </button>
           <button
-            className="flex items-center justify-center gap-2 py-3 rounded-lg bg-spoton-blue/10 border border-spoton-blue/20 text-white text-sm font-medium"
+            className="flex items-center justify-center gap-2 py-3 rounded-lg bg-white/10 border border-white/20 text-zinc-200 text-sm font-medium"
             onClick={async () => {
               flash('share');
               const url = window.location.href;
@@ -367,7 +368,7 @@ export default function CardClient({ rep, company }: { rep: RepData; company: Co
             }}
             style={tapStyle('share')}
           >
-            <svg className="w-4 h-4 text-spoton-blue flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <svg className="w-4 h-4 text-zinc-300 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z" />
             </svg>
             {shareFeedback || 'Share Card'}
