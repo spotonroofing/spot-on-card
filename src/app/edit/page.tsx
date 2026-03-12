@@ -3,6 +3,7 @@
 import { useEffect, useState, useRef } from 'react';
 import { useSession, signOut } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
+import PhotoCropModal from '@/components/PhotoCropModal';
 
 interface RepData {
   id: string;
@@ -51,6 +52,7 @@ export default function EditPage() {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [uploading, setUploading] = useState(false);
+  const [cropFile, setCropFile] = useState<File | null>(null);
   const [message, setMessage] = useState('');
   const [copied, setCopied] = useState(false);
 
@@ -122,14 +124,18 @@ export default function EditPage() {
     }
   }
 
-  async function handlePhotoUpload(e: React.ChangeEvent<HTMLInputElement>) {
+  function handleFileSelect(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];
     if (!file) return;
+    setCropFile(file);
+    e.target.value = '';
+  }
 
+  async function handleCroppedUpload(croppedBlob: Blob) {
+    setCropFile(null);
     setUploading(true);
     const formData = new FormData();
-    formData.append('file', file);
-
+    formData.append('file', croppedBlob, 'profile.jpg');
     try {
       const res = await fetch('/api/upload', { method: 'POST', body: formData });
       const data = await res.json();
@@ -296,7 +302,7 @@ export default function EditPage() {
                   ref={fileInputRef}
                   type="file"
                   accept="image/*"
-                  onChange={handlePhotoUpload}
+                  onChange={handleFileSelect}
                   className="hidden"
                 />
               </div>
@@ -434,6 +440,14 @@ export default function EditPage() {
           </div>
         )}
       </div>
+
+      {cropFile && (
+        <PhotoCropModal
+          imageFile={cropFile}
+          onCropComplete={handleCroppedUpload}
+          onCancel={() => setCropFile(null)}
+        />
+      )}
     </div>
   );
 }

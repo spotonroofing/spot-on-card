@@ -35,6 +35,7 @@ export default function CardClient({ rep, company }: { rep: RepData; company: Co
   const [shareFeedback, setShareFeedback] = useState('');
   const [loaded, setLoaded] = useState(false);
   const [tapped, setTapped] = useState<string | null>(null);
+  const [photoError, setPhotoError] = useState(false);
 
   // Trigger entrance animations after mount
   useEffect(() => {
@@ -143,11 +144,12 @@ export default function CardClient({ rep, company }: { rep: RepData; company: Co
 
         {/* ─── 1. HERO PHOTO ─── */}
         <div className="relative w-full" style={{ ...sectionStyle(heroIdx), height: '45vh' }}>
-          {rep.profilePhoto ? (
+          {rep.profilePhoto && rep.profilePhoto.trim() !== '' && !photoError ? (
             <img
               src={rep.profilePhoto}
               alt={`${rep.firstName} ${rep.lastName}`}
               className="w-full h-full object-cover"
+              onError={() => setPhotoError(true)}
             />
           ) : (
             <div className="w-full h-full bg-gradient-to-b from-card-surface to-card-bg flex items-center justify-center">

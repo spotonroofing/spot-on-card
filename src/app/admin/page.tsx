@@ -3,6 +3,7 @@
 import { useEffect, useState, useRef } from 'react';
 import { useSession, signOut } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
+import PhotoCropModal from '@/components/PhotoCropModal';
 
 interface RepWithStats {
   id: string;
@@ -384,6 +385,7 @@ function RepForm({
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [saving, setSaving] = useState(false);
   const [uploading, setUploading] = useState(false);
+  const [cropFile, setCropFile] = useState<File | null>(null);
   const [error, setError] = useState('');
 
   const [form, setForm] = useState({
@@ -401,12 +403,18 @@ function RepForm({
     personalWebsite: rep?.personalWebsite || '',
   });
 
-  async function handlePhotoUpload(e: React.ChangeEvent<HTMLInputElement>) {
+  function handleFileSelect(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];
     if (!file) return;
+    setCropFile(file);
+    e.target.value = '';
+  }
+
+  async function handleCroppedUpload(croppedBlob: Blob) {
+    setCropFile(null);
     setUploading(true);
     const fd = new FormData();
-    fd.append('file', file);
+    fd.append('file', croppedBlob, 'profile.jpg');
     try {
       const res = await fetch('/api/upload', { method: 'POST', body: fd });
       const data = await res.json();
@@ -476,7 +484,7 @@ function RepForm({
             >
               {uploading ? 'Uploading...' : 'Upload photo'}
             </button>
-            <input ref={fileInputRef} type="file" accept="image/*" onChange={handlePhotoUpload} className="hidden" />
+            <input ref={fileInputRef} type="file" accept="image/*" onChange={handleFileSelect} className="hidden" />
           </div>
 
           <div className="grid grid-cols-2 gap-3">
@@ -540,6 +548,14 @@ function RepForm({
           </div>
         </form>
       </div>
+
+      {cropFile && (
+        <PhotoCropModal
+          imageFile={cropFile}
+          onCropComplete={handleCroppedUpload}
+          onCancel={() => setCropFile(null)}
+        />
+      )}
     </div>
   );
 }
