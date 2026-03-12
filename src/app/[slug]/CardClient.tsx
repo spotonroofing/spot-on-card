@@ -102,6 +102,7 @@ export default function CardClient({ rep, company }: { rep: RepData; company: Co
   const addressIdx = company?.companyAddress ? sectionIndex++ : -1;
   const websiteIdx = company?.companyWebsite ? sectionIndex++ : -1;
   const reviewIdx = sectionIndex++;
+  const socialsIdx = socials.length > 0 ? sectionIndex++ : -1;
   const buttonsIdx = sectionIndex++;
   const footerIdx = sectionIndex++;
 
@@ -182,24 +183,6 @@ export default function CardClient({ rep, company }: { rep: RepData; company: Co
               </p>
             )}
           </div>
-          {socials.length > 0 && (
-            <div className="flex items-center gap-2 flex-shrink-0 self-center">
-              {socials.map((social, i) => (
-                <a
-                  key={i}
-                  href={social.url}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="w-9 h-9 rounded-full border border-white/20 flex items-center justify-center text-white"
-                  title={social.label}
-                  onClick={() => flash(`social-${i}`)}
-                  style={tapStyle(`social-${i}`)}
-                >
-                  <SocialIcon type={social.type} />
-                </a>
-              ))}
-            </div>
-          )}
         </div>
 
         {/* ─── 3. DIVIDER + QUOTE ─── */}
@@ -340,7 +323,30 @@ export default function CardClient({ rep, company }: { rep: RepData; company: Co
 
         </div>
 
-        {/* ─── 5. SAVE CONTACT & SHARE CARD ─── */}
+        {/* ─── 5. SOCIAL ICONS ─── */}
+        {socials.length > 0 && (
+          <div
+            className="flex justify-center gap-3 px-6 mt-3"
+            style={socialsIdx >= 0 ? sectionStyle(socialsIdx) : undefined}
+          >
+            {socials.map((social, i) => (
+              <a
+                key={i}
+                href={social.url}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="w-11 h-11 rounded-full border border-white/20 flex items-center justify-center text-white"
+                title={social.label}
+                onClick={() => flash(`social-${i}`)}
+                style={tapStyle(`social-${i}`)}
+              >
+                <SocialIcon type={social.type} />
+              </a>
+            ))}
+          </div>
+        )}
+
+        {/* ─── 6. SAVE CONTACT & SHARE CARD ─── */}
         <div className="px-6 mt-3 grid grid-cols-2 gap-3" style={sectionStyle(buttonsIdx)}>
           <button
             className="flex items-center justify-center gap-2 py-3 rounded-lg bg-white/10 border border-white/20 text-zinc-200 text-sm font-medium"
@@ -375,7 +381,7 @@ export default function CardClient({ rep, company }: { rep: RepData; company: Co
           </button>
         </div>
 
-        {/* ─── 6. FOOTER ─── */}
+        {/* ─── 7. FOOTER ─── */}
         <div className="text-center py-4" style={sectionStyle(footerIdx)}>
           <a href="/login" className="text-xs text-zinc-600">
             Edit your card
