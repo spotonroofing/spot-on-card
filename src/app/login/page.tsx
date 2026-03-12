@@ -21,7 +21,7 @@ function LoginForm() {
       const result = await signIn('email', {
         email,
         redirect: false,
-        callbackUrl: '/edit',
+        callbackUrl: '/post-login',
       });
 
       if (result?.error) {
