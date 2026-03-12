@@ -8,7 +8,8 @@
     "build": "prisma generate && next build",
     "start": "prisma migrate deploy && next start",
     "lint": "next lint",
-    "postinstall": "prisma generate"
+    "postinstall": "prisma generate",
+    "seed:roster": "npx tsx scripts/seed-roster.ts"
   },
   "prisma": {
     "seed": "npx tsx prisma/seed.ts"
