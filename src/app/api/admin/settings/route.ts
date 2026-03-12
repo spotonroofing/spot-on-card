@@ -36,7 +36,6 @@ export async function PUT(req: NextRequest) {
         companyFacebook: data.companyFacebook !== undefined ? data.companyFacebook : settings.companyFacebook,
         companyLinkedIn: data.companyLinkedIn !== undefined ? data.companyLinkedIn : settings.companyLinkedIn,
         companyTikTok: data.companyTikTok !== undefined ? data.companyTikTok : settings.companyTikTok,
-        companyYouTube: data.companyYouTube !== undefined ? data.companyYouTube : settings.companyYouTube,
         inviteCode: data.inviteCode ?? settings.inviteCode,
         brandPrimaryColor: data.brandPrimaryColor ?? settings.brandPrimaryColor,
         brandSecondaryColor: data.brandSecondaryColor ?? settings.brandSecondaryColor,

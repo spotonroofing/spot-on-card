@@ -37,7 +37,6 @@ interface CompanySettings {
   companyFacebook: string | null;
   companyLinkedIn: string | null;
   companyTikTok: string | null;
-  companyYouTube: string | null;
   inviteCode: string;
   brandPrimaryColor: string;
   brandSecondaryColor: string;
@@ -623,7 +622,6 @@ function SettingsForm({
             { key: 'companyFacebook', label: 'Facebook' },
             { key: 'companyLinkedIn', label: 'LinkedIn' },
             { key: 'companyTikTok', label: 'TikTok' },
-            { key: 'companyYouTube', label: 'YouTube' },
           ].map(({ key, label }) => (
             <div key={key}>
               <label className="block text-xs text-zinc-500 mb-1">{label}</label>

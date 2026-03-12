@@ -105,7 +105,6 @@ export default async function CardPage({ params }: Props) {
         companyFacebook: company.companyFacebook,
         companyLinkedIn: company.companyLinkedIn,
         companyTikTok: company.companyTikTok,
-        companyYouTube: company.companyYouTube,
       } : null}
     />
   );

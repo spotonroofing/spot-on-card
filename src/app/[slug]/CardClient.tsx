@@ -28,7 +28,6 @@ interface CompanyData {
   companyFacebook: string | null;
   companyLinkedIn: string | null;
   companyTikTok: string | null;
-  companyYouTube: string | null;
 }
 
 export default function CardClient({ rep, company }: { rep: RepData; company: CompanyData | null }) {
@@ -36,6 +35,7 @@ export default function CardClient({ rep, company }: { rep: RepData; company: Co
   const [loaded, setLoaded] = useState(false);
   const [tapped, setTapped] = useState<string | null>(null);
   const [photoError, setPhotoError] = useState(false);
+  const [showMapsModal, setShowMapsModal] = useState(false);
 
   // Trigger entrance animations after mount, then clean up transforms
   const [animDone, setAnimDone] = useState(false);
@@ -73,10 +73,6 @@ export default function CardClient({ rep, company }: { rep: RepData; company: Co
     setTimeout(() => setTapped(null), 200);
   }
 
-  const mapsUrl = company?.companyAddress
-    ? `https://maps.google.com/?q=${encodeURIComponent(company.companyAddress)}`
-    : null;
-
   // Collect all social links
   const socials: { type: string; url: string; label: string }[] = [];
 
@@ -85,7 +81,6 @@ export default function CardClient({ rep, company }: { rep: RepData; company: Co
   if (company?.companyFacebook) socials.push({ type: 'facebook', url: company.companyFacebook, label: 'Facebook' });
   if (company?.companyLinkedIn) socials.push({ type: 'linkedin', url: company.companyLinkedIn, label: 'LinkedIn' });
   if (company?.companyTikTok) socials.push({ type: 'tiktok', url: company.companyTikTok, label: 'TikTok' });
-  if (company?.companyYouTube) socials.push({ type: 'youtube', url: company.companyYouTube, label: 'YouTube' });
 
   // Rep personal socials (avoid duplicates by type)
   const companyTypes = new Set(socials.map(s => s.type));
@@ -107,7 +102,6 @@ export default function CardClient({ rep, company }: { rep: RepData; company: Co
   const addressIdx = company?.companyAddress ? sectionIndex++ : -1;
   const websiteIdx = company?.companyWebsite ? sectionIndex++ : -1;
   const socialsIdx = socials.length > 0 ? sectionIndex++ : -1;
-  const actionsIdx = sectionIndex++;
   const footerIdx = sectionIndex++;
 
   function sectionStyle(idx: number) {
@@ -151,7 +145,7 @@ export default function CardClient({ rep, company }: { rep: RepData; company: Co
       <div className="w-full max-w-md mx-auto">
 
         {/* ─── 1. HERO PHOTO ─── */}
-        <div className="relative w-full" style={{ ...sectionStyle(heroIdx), height: '35vh' }}>
+        <div className="relative w-full" style={{ ...sectionStyle(heroIdx), height: '45vh' }}>
           {rep.profilePhoto && rep.profilePhoto.trim() !== '' && !photoError ? (
             <img
               src={rep.profilePhoto}
@@ -176,32 +170,77 @@ export default function CardClient({ rep, company }: { rep: RepData; company: Co
             style={{ background: 'linear-gradient(to bottom, transparent 40%, #111111 100%)' }}
           />
 
-          {/* Logo watermark */}
-          <img
-            src="/images/logo-white.png"
-            alt=""
-            className="absolute top-4 right-4 h-8 pointer-events-none drop-shadow-[0_2px_8px_rgba(0,0,0,0.7)]"
-          />
         </div>
 
         {/* ─── 2. NAME BLOCK ─── */}
-        <div className="px-6 -mt-16 relative z-10" style={sectionStyle(nameIdx)}>
-          <h1 className="font-outfit uppercase tracking-[0.2em]">
-            <span className="block text-3xl font-light text-white" style={{ lineHeight: '0.95' }}>
-              {rep.firstName}
-            </span>
-            <span className="block text-4xl font-extrabold text-white" style={{ lineHeight: '0.95' }}>
-              {rep.lastName}
-            </span>
-          </h1>
-          {rep.jobTitle && (
-            <p
-              className="text-spoton-blue text-xs uppercase tracking-[0.15em] font-outfit font-semibold mt-1"
-              style={titleIdx >= 0 ? sectionStyle(titleIdx) : undefined}
-            >
-              {rep.jobTitle}
-            </p>
-          )}
+        <div className="px-6 -mt-10 relative z-10" style={sectionStyle(nameIdx)}>
+          <div className="flex items-end justify-between">
+            <div>
+              <h1 className="font-outfit uppercase tracking-[0.2em]">
+                <span className="block text-3xl font-light text-white" style={{ lineHeight: '0.95' }}>
+                  {rep.firstName}
+                </span>
+                <span className="block text-4xl font-extrabold text-white" style={{ lineHeight: '0.95' }}>
+                  {rep.lastName}
+                </span>
+              </h1>
+              {rep.jobTitle && (
+                <p
+                  className="text-spoton-blue text-xs uppercase tracking-[0.15em] font-outfit font-semibold mt-1"
+                  style={titleIdx >= 0 ? sectionStyle(titleIdx) : undefined}
+                >
+                  {rep.jobTitle}
+                </p>
+              )}
+            </div>
+            <div className="flex flex-col gap-1.5">
+              <button
+                onClick={() => {
+                  flash('save');
+                  handleSaveContact();
+                }}
+                className="flex items-center gap-1.5 px-3 rounded-full text-white font-outfit font-semibold text-xs"
+                style={{
+                  height: '34px',
+                  background: 'linear-gradient(135deg, #00AEEF, #0088CC)',
+                  ...buttonTapStyle('save'),
+                }}
+              >
+                <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                </svg>
+                Save Contact
+              </button>
+              <button
+                onClick={async () => {
+                  flash('share');
+                  const url = window.location.href;
+                  const title = `${rep.firstName} ${rep.lastName}`;
+                  if (navigator.share) {
+                    try {
+                      await navigator.share({ title, url });
+                    } catch {
+                      // User cancelled share
+                    }
+                  } else {
+                    await navigator.clipboard.writeText(url);
+                    setShareFeedback('Copied!');
+                    setTimeout(() => setShareFeedback(''), 2000);
+                  }
+                }}
+                className="flex items-center gap-1.5 px-3 rounded-full border border-spoton-blue text-white font-outfit font-semibold text-xs bg-transparent"
+                style={{
+                  height: '34px',
+                  ...buttonTapStyle('share'),
+                }}
+              >
+                <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z" />
+                </svg>
+                {shareFeedback || 'Share Card'}
+              </button>
+            </div>
+          </div>
         </div>
 
         {/* ─── 3. DIVIDER + QUOTE ─── */}
@@ -280,12 +319,9 @@ export default function CardClient({ rep, company }: { rep: RepData; company: Co
 
           {/* Address row */}
           {company?.companyAddress && (
-            <a
-              href={mapsUrl!}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="flex items-center gap-3 py-1.5 rounded-xl block"
-              onClick={() => flash('address')}
+            <button
+              className="flex items-center gap-3 py-1.5 rounded-xl w-full text-left"
+              onClick={() => { flash('address'); setShowMapsModal(true); }}
               style={{ ...sectionStyle(addressIdx), ...tapStyle('address') }}
             >
               <div className="w-10 h-10 rounded-lg bg-spoton-blue/10 border border-spoton-blue/20 flex items-center justify-center flex-shrink-0">
@@ -298,7 +334,7 @@ export default function CardClient({ rep, company }: { rep: RepData; company: Co
                 <span className="text-zinc-500 text-xs uppercase tracking-wider block">Office</span>
                 <span className="text-white text-sm block">{company.companyAddress}</span>
               </div>
-            </a>
+            </button>
           )}
 
           {/* Website row */}
@@ -347,55 +383,7 @@ export default function CardClient({ rep, company }: { rep: RepData; company: Co
           </div>
         )}
 
-        {/* ─── 6. ACTION BUTTONS ─── */}
-        <div className="px-6 mt-4 space-y-2" style={sectionStyle(actionsIdx)}>
-          {/* Save Contact — Primary */}
-          <button
-            onClick={() => {
-              flash('save');
-              handleSaveContact();
-            }}
-            className="w-full py-3 rounded-[14px] text-white font-outfit font-bold text-base flex items-center justify-center gap-2"
-            style={{
-              background: 'linear-gradient(135deg, #00AEEF, #0088CC)',
-              ...buttonTapStyle('save'),
-            }}
-          >
-            <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-            </svg>
-            Save Contact
-          </button>
-
-          {/* Share Card — Secondary */}
-          <button
-            onClick={async () => {
-              flash('share');
-              const url = window.location.href;
-              const title = `${rep.firstName} ${rep.lastName}`;
-              if (navigator.share) {
-                try {
-                  await navigator.share({ title, url });
-                } catch {
-                  // User cancelled share
-                }
-              } else {
-                await navigator.clipboard.writeText(url);
-                setShareFeedback('Link copied!');
-                setTimeout(() => setShareFeedback(''), 2000);
-              }
-            }}
-            className="w-full py-3 rounded-[14px] border border-spoton-blue text-white font-outfit font-semibold text-sm flex items-center justify-center gap-2 bg-transparent"
-            style={buttonTapStyle('share')}
-          >
-            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z" />
-            </svg>
-            {shareFeedback || 'Share Card'}
-          </button>
-        </div>
-
-        {/* ─── 7. FOOTER ─── */}
+        {/* ─── 6. FOOTER ─── */}
         <div className="text-center py-4" style={sectionStyle(footerIdx)}>
           <a href="/login" className="text-xs text-zinc-600">
             Edit your card
@@ -403,6 +391,47 @@ export default function CardClient({ rep, company }: { rep: RepData; company: Co
         </div>
 
       </div>
+
+      {/* Maps picker modal */}
+      {showMapsModal && company?.companyAddress && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center px-6"
+          onClick={() => setShowMapsModal(false)}
+        >
+          <div className="absolute inset-0 bg-black/70" />
+          <div
+            className="relative bg-zinc-900 border border-zinc-700 rounded-2xl p-5 w-full max-w-xs space-y-3"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <p className="text-white text-sm font-semibold text-center">Open in Maps</p>
+            <a
+              href={`https://maps.apple.com/?address=${encodeURIComponent(company.companyAddress)}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="block w-full py-2.5 rounded-xl text-white text-sm font-medium text-center"
+              style={{ background: 'linear-gradient(135deg, #00AEEF, #0088CC)' }}
+              onClick={() => setShowMapsModal(false)}
+            >
+              Apple Maps
+            </a>
+            <a
+              href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(company.companyAddress)}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="block w-full py-2.5 rounded-xl border border-zinc-600 text-white text-sm font-medium text-center"
+              onClick={() => setShowMapsModal(false)}
+            >
+              Google Maps
+            </a>
+            <button
+              onClick={() => setShowMapsModal(false)}
+              className="block w-full py-2 text-zinc-500 text-xs text-center"
+            >
+              Cancel
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
@@ -431,12 +460,6 @@ function SocialIcon({ type }: { type: string }) {
       return (
         <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
           <path d="M12.525.02c1.31-.02 2.61-.01 3.91-.02.08 1.53.63 3.09 1.75 4.17 1.12 1.11 2.7 1.62 4.24 1.79v4.03c-1.44-.05-2.89-.35-4.2-.97-.57-.26-1.1-.59-1.62-.93-.01 2.92.01 5.84-.02 8.75-.08 1.4-.54 2.79-1.35 3.94-1.31 1.92-3.58 3.17-5.91 3.21-1.43.08-2.86-.31-4.08-1.03-2.02-1.19-3.44-3.37-3.65-5.71-.02-.5-.03-1-.01-1.49.18-1.9 1.12-3.72 2.58-4.96 1.66-1.44 3.98-2.13 6.15-1.72.02 1.48-.04 2.96-.04 4.44-.99-.32-2.15-.23-3.02.37-.63.41-1.11 1.04-1.36 1.75-.21.51-.15 1.07-.14 1.61.24 1.64 1.82 3.02 3.5 2.87 1.12-.01 2.19-.66 2.77-1.61.19-.33.4-.67.41-1.06.1-1.79.06-3.57.07-5.36.01-4.03-.01-8.05.02-12.07z" />
-        </svg>
-      );
-    case 'youtube':
-      return (
-        <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
-          <path d="M23.498 6.186a3.016 3.016 0 00-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 00.502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 002.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 002.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z" />
         </svg>
       );
     case 'website':

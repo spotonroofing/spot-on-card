@@ -17,7 +17,6 @@ async function main() {
       companyFacebook: 'https://facebook.com/spotonroof',
       companyLinkedIn: 'https://linkedin.com/company/spotonroof',
       companyTikTok: 'https://tiktok.com/@spotonroof',
-      companyYouTube: 'https://youtube.com/@spotonroof',
       inviteCode: 'SPOTON2024',
       brandPrimaryColor: '#00AEEF',
       brandSecondaryColor: '#0A7E8C',

@@ -33,7 +33,6 @@ interface CompanyData {
   companyFacebook: string | null;
   companyLinkedIn: string | null;
   companyTikTok: string | null;
-  companyYouTube: string | null;
 }
 
 interface Analytics {
