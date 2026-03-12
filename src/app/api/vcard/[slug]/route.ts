@@ -1,8 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { generateVCard } from '@/lib/vcard';
-import { readFile } from 'fs/promises';
-import path from 'path';
 
 export async function GET(
   req: NextRequest,
@@ -18,16 +16,10 @@ export async function GET(
 
     const company = await prisma.companySettings.findFirst();
 
-    // Try to get photo as base64
+    // Extract raw base64 from the data URI stored in DB
     let photoBase64: string | undefined;
-    if (rep.profilePhoto) {
-      try {
-        const photoPath = path.join(process.cwd(), 'public', rep.profilePhoto);
-        const photoBuffer = await readFile(photoPath);
-        photoBase64 = photoBuffer.toString('base64');
-      } catch {
-        // Photo not found, skip it
-      }
+    if (rep.profilePhoto?.startsWith('data:image/jpeg;base64,')) {
+      photoBase64 = rep.profilePhoto.replace('data:image/jpeg;base64,', '');
     }
 
     const vcard = generateVCard({

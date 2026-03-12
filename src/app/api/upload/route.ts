@@ -1,8 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@/lib/auth';
 import sharp from 'sharp';
-import { writeFile, mkdir } from 'fs/promises';
-import path from 'path';
 
 export async function POST(req: NextRequest) {
   try {
@@ -32,15 +30,11 @@ export async function POST(req: NextRequest) {
       .jpeg({ quality: 85 })
       .toBuffer();
 
-    // Save to public/uploads
-    const uploadsDir = path.join(process.cwd(), 'public', 'uploads');
-    await mkdir(uploadsDir, { recursive: true });
+    // Convert to base64 data URI (stored in DB, works on ephemeral filesystems)
+    const base64 = processed.toString('base64');
+    const dataUri = `data:image/jpeg;base64,${base64}`;
 
-    const filename = `${Date.now()}-${Math.random().toString(36).substring(7)}.jpg`;
-    const filepath = path.join(uploadsDir, filename);
-    await writeFile(filepath, processed);
-
-    return NextResponse.json({ url: `/uploads/${filename}` });
+    return NextResponse.json({ url: dataUri });
   } catch (error) {
     console.error('Upload error:', error);
     return NextResponse.json({ error: 'Upload failed' }, { status: 500 });
