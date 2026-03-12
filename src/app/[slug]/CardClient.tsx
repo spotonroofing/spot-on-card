@@ -101,7 +101,7 @@ export default function CardClient({ rep, company }: { rep: RepData; company: Co
   const addressIdx = company?.companyAddress ? sectionIndex++ : -1;
   const websiteIdx = company?.companyWebsite ? sectionIndex++ : -1;
   const reviewIdx = sectionIndex++;
-  const socialsIdx = socials.length > 0 ? sectionIndex++ : -1;
+  const buttonsIdx = sectionIndex++;
   const footerIdx = sectionIndex++;
 
   function sectionStyle(idx: number) {
@@ -181,39 +181,24 @@ export default function CardClient({ rep, company }: { rep: RepData; company: Co
               </p>
             )}
           </div>
-          <div className="flex flex-col gap-1.5 flex-shrink-0 mt-1">
-            <button
-              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-spoton-blue/10 border border-spoton-blue/20 text-white text-xs font-medium whitespace-nowrap"
-              onClick={() => { flash('save'); handleSaveContact(); }}
-              style={tapStyle('save')}
-            >
-              <svg className="w-3.5 h-3.5 text-spoton-blue flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z" />
-              </svg>
-              Save Contact
-            </button>
-            <button
-              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-spoton-blue/10 border border-spoton-blue/20 text-white text-xs font-medium whitespace-nowrap"
-              onClick={async () => {
-                flash('share');
-                const url = window.location.href;
-                const title = `${rep.firstName} ${rep.lastName}`;
-                if (navigator.share) {
-                  try { await navigator.share({ title, url }); } catch {}
-                } else {
-                  await navigator.clipboard.writeText(url);
-                  setShareFeedback('Copied!');
-                  setTimeout(() => setShareFeedback(''), 2000);
-                }
-              }}
-              style={tapStyle('share')}
-            >
-              <svg className="w-3.5 h-3.5 text-spoton-blue flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z" />
-              </svg>
-              {shareFeedback || 'Share Card'}
-            </button>
-          </div>
+          {socials.length > 0 && (
+            <div className="flex items-center gap-2 flex-shrink-0 self-center">
+              {socials.map((social, i) => (
+                <a
+                  key={i}
+                  href={social.url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="w-9 h-9 rounded-full border border-white/20 flex items-center justify-center text-white"
+                  title={social.label}
+                  onClick={() => flash(`social-${i}`)}
+                  style={tapStyle(`social-${i}`)}
+                >
+                  <SocialIcon type={social.type} />
+                </a>
+              ))}
+            </div>
+          )}
         </div>
 
         {/* ─── 3. DIVIDER + QUOTE ─── */}
@@ -353,28 +338,40 @@ export default function CardClient({ rep, company }: { rep: RepData; company: Co
 
         </div>
 
-        {/* ─── 5. SOCIAL ICONS ─── */}
-        {socials.length > 0 && (
-          <div
-            className="flex justify-center gap-3 px-6 mt-3"
-            style={socialsIdx >= 0 ? sectionStyle(socialsIdx) : undefined}
+        {/* ─── 5. SAVE CONTACT & SHARE CARD ─── */}
+        <div className="px-6 mt-3 grid grid-cols-2 gap-3" style={sectionStyle(buttonsIdx)}>
+          <button
+            className="flex items-center justify-center gap-2 py-3 rounded-lg bg-spoton-blue/10 border border-spoton-blue/20 text-white text-sm font-medium"
+            onClick={() => { flash('save'); handleSaveContact(); }}
+            style={tapStyle('save')}
           >
-            {socials.map((social, i) => (
-              <a
-                key={i}
-                href={social.url}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="w-11 h-11 rounded-full border border-white/20 flex items-center justify-center text-white"
-                title={social.label}
-                onClick={() => flash(`social-${i}`)}
-                style={tapStyle(`social-${i}`)}
-              >
-                <SocialIcon type={social.type} />
-              </a>
-            ))}
-          </div>
-        )}
+            <svg className="w-4 h-4 text-spoton-blue flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z" />
+            </svg>
+            Save Contact
+          </button>
+          <button
+            className="flex items-center justify-center gap-2 py-3 rounded-lg bg-spoton-blue/10 border border-spoton-blue/20 text-white text-sm font-medium"
+            onClick={async () => {
+              flash('share');
+              const url = window.location.href;
+              const title = `${rep.firstName} ${rep.lastName}`;
+              if (navigator.share) {
+                try { await navigator.share({ title, url }); } catch {}
+              } else {
+                await navigator.clipboard.writeText(url);
+                setShareFeedback('Copied!');
+                setTimeout(() => setShareFeedback(''), 2000);
+              }
+            }}
+            style={tapStyle('share')}
+          >
+            <svg className="w-4 h-4 text-spoton-blue flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z" />
+            </svg>
+            {shareFeedback || 'Share Card'}
+          </button>
+        </div>
 
         {/* ─── 6. FOOTER ─── */}
         <div className="text-center py-4" style={sectionStyle(footerIdx)}>
