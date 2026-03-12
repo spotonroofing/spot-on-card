@@ -57,7 +57,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
             html: `
               <div style="background-color: #000; padding: 40px; font-family: Arial, sans-serif;">
                 <div style="max-width: 400px; margin: 0 auto; text-align: center;">
-                  <img src="https://spot-on-card-production.up.railway.app/images/logo-white.png" alt="SpotOnRoof" style="max-width: 180px; margin: 0 auto 8px;" />
+                  <img src="https://card.spotonroof.com/images/logo-white.png" alt="SpotOnRoof" style="max-width: 180px; margin: 0 auto 8px;" />
                   <p style="color: #ccc; margin-bottom: 24px;">Click the button below to sign in to SpotOn Card.</p>
                   <a href="${url}" style="display: inline-block; background: linear-gradient(135deg, #00AEEF, #0077A8); color: #fff; padding: 14px 32px; border-radius: 8px; text-decoration: none; font-weight: bold;">
                     Sign In
