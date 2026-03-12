@@ -101,6 +101,9 @@ export default function CardClient({ rep, company }: { rep: RepData; company: Co
   const emailIdx = rep.email ? sectionIndex++ : -1;
   const addressIdx = company?.companyAddress ? sectionIndex++ : -1;
   const websiteIdx = company?.companyWebsite ? sectionIndex++ : -1;
+  const reviewIdx = sectionIndex++;
+  const saveIdx = sectionIndex++;
+  const shareIdx = sectionIndex++;
   const socialsIdx = socials.length > 0 ? sectionIndex++ : -1;
   const footerIdx = sectionIndex++;
 
@@ -128,14 +131,6 @@ export default function CardClient({ rep, company }: { rep: RepData; company: Co
     };
   }
 
-  function buttonTapStyle(key: string): React.CSSProperties {
-    if (tapped !== key) return {};
-    return {
-      transform: 'scale(0.95)',
-      filter: 'brightness(0.85)',
-    };
-  }
-
   return (
     <div className="bg-card-bg flex flex-col items-center font-sans" style={{ minHeight: '100dvh', overflowX: 'hidden' }}>
       <style>{`
@@ -145,17 +140,17 @@ export default function CardClient({ rep, company }: { rep: RepData; company: Co
       <div className="w-full max-w-md mx-auto">
 
         {/* ─── 1. HERO PHOTO ─── */}
-        <div className="relative w-full" style={{ ...sectionStyle(heroIdx), height: 'calc(50vh + env(safe-area-inset-top, 0px))' }}>
+        <div className="relative w-full overflow-hidden" style={{ ...sectionStyle(heroIdx), minHeight: 'calc(40vh + env(safe-area-inset-top, 0px))', paddingTop: 'env(safe-area-inset-top, 0px)' }}>
           {rep.profilePhoto && rep.profilePhoto.trim() !== '' && !photoError ? (
             <img
               src={rep.profilePhoto}
               alt={`${rep.firstName} ${rep.lastName}`}
-              className="w-full h-full object-cover"
+              className="absolute inset-0 w-full h-full object-cover"
               onError={() => setPhotoError(true)}
             />
           ) : (
             <div
-              className="w-full h-full flex items-center justify-center"
+              className="absolute inset-0 w-full h-full flex items-center justify-center"
               style={{ background: 'linear-gradient(to bottom, #1a1a1a, #111111)' }}
             >
               <span className="text-7xl font-outfit font-bold text-spoton-blue">
@@ -174,73 +169,22 @@ export default function CardClient({ rep, company }: { rep: RepData; company: Co
 
         {/* ─── 2. NAME BLOCK ─── */}
         <div className="px-6 -mt-10 relative z-10" style={sectionStyle(nameIdx)}>
-          <div className="flex items-end justify-between">
-            <div>
-              <h1 className="font-outfit uppercase tracking-[0.2em]">
-                <span className="block text-3xl font-light text-white" style={{ lineHeight: '0.95' }}>
-                  {rep.firstName}
-                </span>
-                <span className="block text-4xl font-extrabold text-white" style={{ lineHeight: '0.95' }}>
-                  {rep.lastName}
-                </span>
-              </h1>
-              {rep.jobTitle && (
-                <p
-                  className="text-spoton-blue text-xs uppercase tracking-[0.15em] font-outfit font-semibold mt-1"
-                  style={titleIdx >= 0 ? sectionStyle(titleIdx) : undefined}
-                >
-                  {rep.jobTitle}
-                </p>
-              )}
-            </div>
-            <div className="flex flex-col gap-1.5">
-              <button
-                onClick={() => {
-                  flash('save');
-                  handleSaveContact();
-                }}
-                className="flex items-center gap-1.5 px-3 rounded-full text-white font-outfit font-semibold text-xs"
-                style={{
-                  height: '34px',
-                  background: 'linear-gradient(135deg, #00AEEF, #0088CC)',
-                  ...buttonTapStyle('save'),
-                }}
-              >
-                <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                </svg>
-                Save Contact
-              </button>
-              <button
-                onClick={async () => {
-                  flash('share');
-                  const url = window.location.href;
-                  const title = `${rep.firstName} ${rep.lastName}`;
-                  if (navigator.share) {
-                    try {
-                      await navigator.share({ title, url });
-                    } catch {
-                      // User cancelled share
-                    }
-                  } else {
-                    await navigator.clipboard.writeText(url);
-                    setShareFeedback('Copied!');
-                    setTimeout(() => setShareFeedback(''), 2000);
-                  }
-                }}
-                className="flex items-center gap-1.5 px-3 rounded-full border border-spoton-blue text-white font-outfit font-semibold text-xs bg-transparent"
-                style={{
-                  height: '34px',
-                  ...buttonTapStyle('share'),
-                }}
-              >
-                <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z" />
-                </svg>
-                {shareFeedback || 'Share Card'}
-              </button>
-            </div>
-          </div>
+          <h1 className="font-outfit uppercase tracking-[0.2em]">
+            <span className="block text-3xl font-light text-white" style={{ lineHeight: '0.95' }}>
+              {rep.firstName}
+            </span>
+            <span className="block text-4xl font-extrabold text-white" style={{ lineHeight: '0.95' }}>
+              {rep.lastName}
+            </span>
+          </h1>
+          {rep.jobTitle && (
+            <p
+              className="text-spoton-blue text-xs uppercase tracking-[0.15em] font-outfit font-semibold mt-1"
+              style={titleIdx >= 0 ? sectionStyle(titleIdx) : undefined}
+            >
+              {rep.jobTitle}
+            </p>
+          )}
         </div>
 
         {/* ─── 3. DIVIDER + QUOTE ─── */}
@@ -358,6 +302,68 @@ export default function CardClient({ rep, company }: { rep: RepData; company: Co
               </div>
             </a>
           )}
+
+          {/* Leave a Review row */}
+          <a
+            href="https://placeholder-review-link.com"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="flex items-center gap-3 py-1.5 rounded-xl"
+            onClick={() => flash('review')}
+            style={{ ...sectionStyle(reviewIdx), ...tapStyle('review') }}
+          >
+            <div className="w-10 h-10 rounded-lg bg-spoton-blue/10 border border-spoton-blue/20 flex items-center justify-center flex-shrink-0">
+              <svg className="w-5 h-5 text-spoton-blue" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z" />
+              </svg>
+            </div>
+            <div className="flex-1 min-w-0">
+              <span className="text-white text-sm block">Leave a Review</span>
+            </div>
+          </a>
+
+          {/* Save Contact row */}
+          <button
+            className="flex items-center gap-3 py-1.5 rounded-xl w-full text-left"
+            onClick={() => { flash('save'); handleSaveContact(); }}
+            style={{ ...sectionStyle(saveIdx), ...tapStyle('save') }}
+          >
+            <div className="w-10 h-10 rounded-lg bg-spoton-blue/10 border border-spoton-blue/20 flex items-center justify-center flex-shrink-0">
+              <svg className="w-5 h-5 text-spoton-blue" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z" />
+              </svg>
+            </div>
+            <div className="flex-1 min-w-0">
+              <span className="text-white text-sm block">Save Contact</span>
+            </div>
+          </button>
+
+          {/* Share Card row */}
+          <button
+            className="flex items-center gap-3 py-1.5 rounded-xl w-full text-left"
+            onClick={async () => {
+              flash('share');
+              const url = window.location.href;
+              const title = `${rep.firstName} ${rep.lastName}`;
+              if (navigator.share) {
+                try { await navigator.share({ title, url }); } catch {}
+              } else {
+                await navigator.clipboard.writeText(url);
+                setShareFeedback('Copied!');
+                setTimeout(() => setShareFeedback(''), 2000);
+              }
+            }}
+            style={{ ...sectionStyle(shareIdx), ...tapStyle('share') }}
+          >
+            <div className="w-10 h-10 rounded-lg bg-spoton-blue/10 border border-spoton-blue/20 flex items-center justify-center flex-shrink-0">
+              <svg className="w-5 h-5 text-spoton-blue" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z" />
+              </svg>
+            </div>
+            <div className="flex-1 min-w-0">
+              <span className="text-white text-sm block">{shareFeedback || 'Share Card'}</span>
+            </div>
+          </button>
         </div>
 
         {/* ─── 5. SOCIAL ICONS ─── */}
