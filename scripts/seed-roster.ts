@@ -60,6 +60,13 @@ function roleFor(email: string): Role {
 // ── main ─────────────────────────────────────────────────────────────
 
 async function main() {
+  // Guard: skip if roster is already seeded (safe to run on every deploy)
+  const existingCount = await prisma.rep.count();
+  if (existingCount >= 19) {
+    console.log('Roster already seeded, skipping');
+    return;
+  }
+
   console.log(`Seeding ${roster.length} rep+user pairs…\n`);
 
   for (const entry of roster) {
