@@ -147,18 +147,19 @@ export default function CardClient({ rep, company }: { rep: RepData; company: Co
       <div className="w-full max-w-md mx-auto">
 
         {/* ─── 1. HERO PHOTO ─── */}
-        <div className="relative w-full overflow-hidden" style={{ ...sectionStyle(heroIdx), minHeight: 'calc(40vh + env(safe-area-inset-top, 0px))', paddingTop: 'env(safe-area-inset-top, 0px)' }}>
+        <div className="relative w-full overflow-hidden" style={{ ...sectionStyle(heroIdx), paddingTop: 'env(safe-area-inset-top, 0px)' }}>
           {rep.profilePhoto && rep.profilePhoto.trim() !== '' && !photoError ? (
             <img
               src={rep.profilePhoto}
               alt={`${rep.firstName} ${rep.lastName}`}
-              className="absolute inset-0 w-full h-full object-cover"
+              className="w-full object-cover block"
+              style={{ minHeight: '40vh' }}
               onError={() => setPhotoError(true)}
             />
           ) : (
             <div
-              className="absolute inset-0 w-full h-full flex items-center justify-center"
-              style={{ background: 'linear-gradient(to bottom, #1a1a1a, #111111)' }}
+              className="w-full flex items-center justify-center"
+              style={{ minHeight: '40vh', background: 'linear-gradient(to bottom, #1a1a1a, #111111)' }}
             >
               <span className="text-7xl font-outfit font-bold text-spoton-blue">
                 {rep.firstName[0]}{rep.lastName[0]}
