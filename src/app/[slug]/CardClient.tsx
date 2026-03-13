@@ -2,6 +2,15 @@
 
 import { useEffect, useState } from 'react';
 
+function formatPhone(raw: string): string {
+  const digits = raw.replace(/\D/g, '');
+  const national = digits.startsWith('1') && digits.length === 11 ? digits.slice(1) : digits;
+  if (national.length === 10) {
+    return `(${national.slice(0, 3)}) ${national.slice(3, 6)}-${national.slice(6)}`;
+  }
+  return raw;
+}
+
 interface RepData {
   id: string;
   firstName: string;
@@ -238,7 +247,7 @@ export default function CardClient({ rep, company }: { rep: RepData; company: Co
                     style={tapStyle('phone-mobile')}
                   >
                     <span className="text-zinc-500 text-xs uppercase tracking-wider block">Mobile</span>
-                    <span className="text-white block">{rep.phone}</span>
+                    <span className="text-white block">{formatPhone(rep.phone)}</span>
                   </a>
                 )}
                 {company?.companyPhone && (
@@ -249,7 +258,7 @@ export default function CardClient({ rep, company }: { rep: RepData; company: Co
                     style={tapStyle('phone-office')}
                   >
                     <span className="text-zinc-500 text-xs uppercase tracking-wider block">Office</span>
-                    <span className="text-white block">{company.companyPhone}</span>
+                    <span className="text-white block">{formatPhone(company.companyPhone)}</span>
                   </a>
                 )}
               </div>
