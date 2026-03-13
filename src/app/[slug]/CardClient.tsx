@@ -139,7 +139,7 @@ export default function CardClient({ rep, company }: { rep: RepData; company: Co
   }
 
   return (
-    <div className="bg-card-bg flex flex-col items-center font-sans" style={{ minHeight: '100dvh', overflowX: 'hidden' }}>
+    <div className="bg-card-bg flex flex-col items-center font-sans pb-[150px]" style={{ minHeight: '100dvh', overflowX: 'hidden' }}>
       <style>{`
         * { -webkit-tap-highlight-color: transparent; }
         html, body { overflow-x: hidden; width: 100%; }
