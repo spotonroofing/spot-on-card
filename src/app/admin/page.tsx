@@ -64,6 +64,7 @@ export default function AdminPage() {
   const [editingRep, setEditingRep] = useState<RepWithStats | null>(null);
   const [showAddRep, setShowAddRep] = useState(false);
   const [message, setMessage] = useState('');
+  const [syncing, setSyncing] = useState(false);
 
   useEffect(() => {
     if (status === 'unauthenticated') {
@@ -134,6 +135,29 @@ export default function AdminPage() {
     }
   }
 
+  async function syncRoster() {
+    setSyncing(true);
+    setMessage('');
+    try {
+      const res = await fetch('/api/admin/sync-roster', { method: 'POST' });
+      const data = await res.json();
+      if (res.ok) {
+        const parts = [`Created ${data.created}, updated ${data.updated}`];
+        if (data.skipped > 0) parts.push(`${data.skipped} skipped (no email)`);
+        if (data.errors?.length) parts.push(`${data.errors.length} error(s)`);
+        setMessage(`Roster sync complete: ${parts.join(', ')}`);
+        loadData();
+      } else {
+        setMessage(`Sync failed: ${data.error || 'Unknown error'}`);
+      }
+    } catch {
+      setMessage('Sync failed: network error');
+    } finally {
+      setSyncing(false);
+      setTimeout(() => setMessage(''), 5000);
+    }
+  }
+
   if (status === 'loading' || loading) {
     return (
       <div className="min-h-screen bg-black flex items-center justify-center">
@@ -190,12 +214,21 @@ export default function AdminPage() {
           <div>
             <div className="flex items-center justify-between mb-4">
               <h2 className="text-lg font-bold text-white">Sales Reps ({reps.length})</h2>
-              <button
-                onClick={() => { setShowAddRep(true); setEditingRep(null); }}
-                className="px-4 py-2 bg-gradient-to-r from-[#00AEEF] to-[#0077A8] text-white text-sm font-semibold rounded-lg hover:opacity-90"
-              >
-                + Add New Rep
-              </button>
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={syncRoster}
+                  disabled={syncing}
+                  className="px-4 py-2 bg-zinc-700 text-white text-sm font-semibold rounded-lg hover:bg-zinc-600 disabled:opacity-50"
+                >
+                  {syncing ? 'Syncing...' : 'Sync Roster'}
+                </button>
+                <button
+                  onClick={() => { setShowAddRep(true); setEditingRep(null); }}
+                  className="px-4 py-2 bg-gradient-to-r from-[#00AEEF] to-[#0077A8] text-white text-sm font-semibold rounded-lg hover:opacity-90"
+                >
+                  + Add New Rep
+                </button>
+              </div>
             </div>
 
             <div className="bg-zinc-900 border border-zinc-800 rounded-xl overflow-hidden">
