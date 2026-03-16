@@ -41,20 +41,21 @@ export async function POST() {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 403 });
     }
 
-    const serviceEmail = process.env.GOOGLE_SERVICE_ACCOUNT_EMAIL;
-    const privateKey = process.env.GOOGLE_PRIVATE_KEY;
+    const serviceAccountKey = process.env.GOOGLE_SERVICE_ACCOUNT_KEY;
     const sheetId = process.env.GOOGLE_SHEET_ID;
 
-    if (!serviceEmail || !privateKey || !sheetId) {
+    if (!serviceAccountKey || !sheetId) {
       return NextResponse.json(
-        { error: 'Missing Google Sheets environment variables (GOOGLE_SERVICE_ACCOUNT_EMAIL, GOOGLE_PRIVATE_KEY, GOOGLE_SHEET_ID)' },
+        { error: 'Missing Google Sheets environment variables (GOOGLE_SERVICE_ACCOUNT_KEY, GOOGLE_SHEET_ID)' },
         { status: 500 }
       );
     }
 
+    const { client_email, private_key } = JSON.parse(serviceAccountKey);
+
     const jwtAuth = new google.auth.JWT({
-      email: serviceEmail,
-      key: privateKey.replace(/\\n/g, '\n'),
+      email: client_email,
+      key: private_key,
       scopes: ['https://www.googleapis.com/auth/spreadsheets.readonly'],
     });
 
