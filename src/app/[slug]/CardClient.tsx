@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 
 function formatPhone(raw: string): string {
   const digits = raw.replace(/\D/g, '');
@@ -46,6 +46,8 @@ export default function CardClient({ rep, company }: { rep: RepData; company: Co
   const [tapped, setTapped] = useState<string | null>(null);
   const [photoError, setPhotoError] = useState(false);
   const [showMapsModal, setShowMapsModal] = useState(false);
+  const firstNameRef = useRef<HTMLSpanElement>(null);
+  const lastNameRef = useRef<HTMLSpanElement>(null);
 
   // Trigger entrance animations after mount, then clean up transforms
   const [animDone, setAnimDone] = useState(false);
@@ -99,6 +101,28 @@ export default function CardClient({ rep, company }: { rep: RepData; company: Co
   if (rep.personalFacebook && !companyTypes.has('facebook')) socials.push({ type: 'facebook', url: rep.personalFacebook, label: 'Facebook' });
   if (rep.personalTikTok && !companyTypes.has('tiktok')) socials.push({ type: 'tiktok', url: rep.personalTikTok, label: 'TikTok' });
   if (rep.personalWebsite) socials.push({ type: 'website', url: rep.personalWebsite, label: 'Website' });
+
+  // Calculate social icons width for name max-width constraint
+  const socialIconsWidth = socials.length > 0 ? socials.length * 32 + (socials.length - 1) * 6 + 16 : 0;
+
+  // Auto-scale name text to fit available width without wrapping
+  useEffect(() => {
+    function fitText(el: HTMLSpanElement | null, baseSize: number) {
+      if (!el) return;
+      el.style.fontSize = `${baseSize}px`;
+      if (el.scrollWidth > el.clientWidth && el.clientWidth > 0) {
+        const scale = el.clientWidth / el.scrollWidth;
+        el.style.fontSize = `${Math.max(Math.floor(baseSize * scale), 12)}px`;
+      }
+    }
+    function fitAll() {
+      fitText(firstNameRef.current, 30);
+      fitText(lastNameRef.current, 36);
+    }
+    fitAll();
+    window.addEventListener('resize', fitAll);
+    return () => window.removeEventListener('resize', fitAll);
+  }, [rep.firstName, rep.lastName]);
 
   // Animation stagger: each section gets an increasing delay
   const hasPhone = rep.phone || company?.companyPhone;
@@ -176,13 +200,21 @@ export default function CardClient({ rep, company }: { rep: RepData; company: Co
         </div>
 
         {/* ─── 2. NAME BLOCK ─── */}
-        <div className="px-6 -mt-10 relative z-10 flex items-end justify-between gap-3" style={sectionStyle(nameIdx)}>
-          <div>
+        <div className="px-6 -mt-10 relative z-10" style={sectionStyle(nameIdx)}>
+          <div style={socialIconsWidth > 0 ? { maxWidth: `calc(100% - ${socialIconsWidth}px)` } : undefined}>
             <h1 className="font-outfit uppercase tracking-[0.2em]">
-              <span className="block text-3xl font-light text-white" style={{ lineHeight: '0.95' }}>
+              <span
+                ref={firstNameRef}
+                className="block text-3xl font-light text-white"
+                style={{ lineHeight: '0.95', whiteSpace: 'nowrap', overflow: 'hidden' }}
+              >
                 {rep.firstName}
               </span>
-              <span className="block text-4xl font-extrabold text-white" style={{ lineHeight: '0.95' }}>
+              <span
+                ref={lastNameRef}
+                className="block text-4xl font-extrabold text-white"
+                style={{ lineHeight: '0.95', whiteSpace: 'nowrap', overflow: 'hidden' }}
+              >
                 {rep.lastName}
               </span>
             </h1>
@@ -193,7 +225,7 @@ export default function CardClient({ rep, company }: { rep: RepData; company: Co
             )}
           </div>
           {socials.length > 0 && (
-            <div className="flex items-center gap-1.5 mb-0.5">
+            <div className="absolute right-6 bottom-0 flex items-center gap-1.5">
               {socials.map((social, i) => (
                 <a
                   key={i}
