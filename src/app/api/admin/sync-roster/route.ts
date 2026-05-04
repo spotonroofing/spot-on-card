@@ -9,8 +9,7 @@ const ADMIN_EMAILS = [
   'admin@spotonroof.com',
 ];
 
-const SPECIALIST_TABS = ['Senior Reps', 'Junior Reps'];
-const EXCLUDED_TABS = ['Cold Callers'];
+const EXCLUDED_TABS = ['Appointment Setters'];
 
 async function requireAdmin() {
   const session = await auth();
@@ -32,6 +31,21 @@ function findColumnIndex(headers: string[], ...candidates: string[]): number {
 
 function generateSlugFromName(firstName: string, lastName: string): string {
   return `${firstName}-${lastName}`.toLowerCase().replace(/[^a-z0-9-]/g, '');
+}
+
+function normalizeName(raw: string): string {
+  const trimmed = raw.trim();
+  if (!trimmed) return '';
+  const isAllCaps = trimmed === trimmed.toUpperCase() && /[A-Z]/.test(trimmed);
+  if (!isAllCaps) return trimmed;
+  return trimmed
+    .toLowerCase()
+    .split(/(\s+|-)/)
+    .map((part) => {
+      if (!part || /^\s+$/.test(part) || part === '-') return part;
+      return part.charAt(0).toUpperCase() + part.slice(1);
+    })
+    .join('');
 }
 
 export async function POST() {
@@ -61,7 +75,6 @@ export async function POST() {
 
     const sheets = google.sheets({ version: 'v4', auth: jwtAuth });
 
-    // Get all sheet/tab names
     const spreadsheet = await sheets.spreadsheets.get({ spreadsheetId: sheetId });
     const allTabs = spreadsheet.data.sheets || [];
     const tabNames = allTabs
@@ -71,7 +84,9 @@ export async function POST() {
     let created = 0;
     let updated = 0;
     let skipped = 0;
+    let deactivated = 0;
     const errors: string[] = [];
+    const rosterEmails = new Set<string>();
 
     console.log(`[sync-roster] Starting sync across ${tabNames.length} tabs: ${tabNames.join(', ')}`);
 
@@ -90,7 +105,7 @@ export async function POST() {
         continue;
       }
 
-      if (rows.length < 2) continue; // need header + at least one data row
+      if (rows.length < 2) continue;
 
       const headers = rows[0].map((h) => (h || '').trim());
       const firstNameIdx = findColumnIndex(headers, 'First Name');
@@ -112,8 +127,8 @@ export async function POST() {
 
       for (let i = 1; i < rows.length; i++) {
         const row = rows[i];
-        const firstName = (row[firstNameIdx] || '').trim();
-        const lastName = (row[lastNameIdx] || '').trim();
+        const firstName = normalizeName(row[firstNameIdx] || '');
+        const lastName = normalizeName(row[lastNameIdx] || '');
 
         if (!firstName || !lastName) continue;
 
@@ -127,12 +142,11 @@ export async function POST() {
           continue;
         }
 
+        rosterEmails.add(email);
+
         const phone = phoneIdx !== -1 ? (row[phoneIdx] || '').trim() : '';
         const roleValue = roleIdx !== -1 ? (row[roleIdx] || '').trim() : '';
-
-        const jobTitle = SPECIALIST_TABS.includes(tabName)
-          ? 'Exterior Specialist'
-          : roleValue;
+        const jobTitle = roleValue || tabName;
 
         const role = ADMIN_EMAILS.includes(email) ? 'admin' : 'rep';
 
@@ -164,6 +178,7 @@ export async function POST() {
                 jobTitle,
                 phone,
                 role,
+                isActive: true,
               },
             });
             console.log(
@@ -189,6 +204,7 @@ export async function POST() {
                 jobTitle,
                 phone,
                 role,
+                isActive: true,
               },
             });
             console.log(
@@ -210,14 +226,32 @@ export async function POST() {
       }
     }
 
+    const allReps = await prisma.rep.findMany({ select: { id: true, email: true, firstName: true, lastName: true, isActive: true } });
+    for (const rep of allReps) {
+      const repEmail = rep.email.toLowerCase();
+      if (ADMIN_EMAILS.includes(repEmail)) continue;
+      if (rosterEmails.has(repEmail)) continue;
+      if (!rep.isActive) continue;
+      try {
+        await prisma.rep.update({ where: { id: rep.id }, data: { isActive: false } });
+        console.log(`[sync-roster] DEACTIVATE ${rep.firstName} ${rep.lastName} <${rep.email}> (id=${rep.id})`);
+        deactivated++;
+      } catch (err) {
+        const message = err instanceof Error ? err.message : String(err);
+        console.error(`[sync-roster] ERROR deactivating ${rep.email}: ${message}`);
+        errors.push(`Deactivate ${rep.email}: ${message}`);
+      }
+    }
+
     console.log(
-      `[sync-roster] Done. created=${created}, updated=${updated}, skipped=${skipped}, errors=${errors.length}`
+      `[sync-roster] Done. created=${created}, updated=${updated}, skipped=${skipped}, deactivated=${deactivated}, errors=${errors.length}`
     );
 
     return NextResponse.json({
       created,
       updated,
       skipped,
+      deactivated,
       errors: errors.length > 0 ? errors : undefined,
     });
   } catch (error) {
