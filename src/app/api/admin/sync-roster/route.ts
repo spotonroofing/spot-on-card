@@ -73,6 +73,8 @@ export async function POST() {
     let skipped = 0;
     const errors: string[] = [];
 
+    console.log(`[sync-roster] Starting sync across ${tabNames.length} tabs: ${tabNames.join(', ')}`);
+
     for (const tabName of tabNames) {
       const range = `'${tabName}'`;
       let rows: string[][];
@@ -115,11 +117,12 @@ export async function POST() {
 
         if (!firstName || !lastName) continue;
 
-        const workEmail = workEmailIdx !== -1 ? (row[workEmailIdx] || '').trim() : '';
-        const personalEmail = personalEmailIdx !== -1 ? (row[personalEmailIdx] || '').trim() : '';
+        const workEmail = workEmailIdx !== -1 ? (row[workEmailIdx] || '').trim().toLowerCase() : '';
+        const personalEmail = personalEmailIdx !== -1 ? (row[personalEmailIdx] || '').trim().toLowerCase() : '';
         const email = workEmail || personalEmail;
 
         if (!email) {
+          console.log(`[sync-roster] SKIP row ${i + 1} in "${tabName}": ${firstName} ${lastName} (no email)`);
           skipped++;
           continue;
         }
@@ -127,65 +130,89 @@ export async function POST() {
         const phone = phoneIdx !== -1 ? (row[phoneIdx] || '').trim() : '';
         const roleValue = roleIdx !== -1 ? (row[roleIdx] || '').trim() : '';
 
-        // Job title: "Exterior Specialist" for Senior/Junior Reps tabs, otherwise use Role column
         const jobTitle = SPECIALIST_TABS.includes(tabName)
           ? 'Exterior Specialist'
           : roleValue;
 
-        // Role: admin for specific emails, rep for everyone else
-        const role = ADMIN_EMAILS.includes(email.toLowerCase()) ? 'admin' : 'rep';
+        const role = ADMIN_EMAILS.includes(email) ? 'admin' : 'rep';
 
         const slug = generateSlugFromName(firstName, lastName);
 
         try {
-          const existing = await prisma.rep.findUnique({ where: { email } });
+          let existing = await prisma.rep.findFirst({
+            where: { email: { equals: email, mode: 'insensitive' } },
+          });
+          let matchedBy: 'email' | 'name' | null = existing ? 'email' : null;
+
+          if (!existing) {
+            existing = await prisma.rep.findFirst({
+              where: {
+                firstName: { equals: firstName, mode: 'insensitive' },
+                lastName: { equals: lastName, mode: 'insensitive' },
+              },
+            });
+            if (existing) matchedBy = 'name';
+          }
 
           if (existing) {
             await prisma.rep.update({
-              where: { email },
-              data: {
-                firstName,
-                lastName,
-                jobTitle,
-                phone,
-                role,
-              },
-            });
-            updated++;
-          } else {
-            // Check if slug is taken and append suffix if needed
-            let finalSlug = slug;
-            let counter = 1;
-            while (await prisma.rep.findUnique({ where: { slug: finalSlug } })) {
-              counter++;
-              finalSlug = `${slug}-${counter}`;
-            }
-
-            await prisma.rep.create({
+              where: { id: existing.id },
               data: {
                 firstName,
                 lastName,
                 email,
-                slug: finalSlug,
                 jobTitle,
                 phone,
                 role,
               },
             });
+            console.log(
+              `[sync-roster] UPDATE ${firstName} ${lastName} <${email}> in "${tabName}" (matched by ${matchedBy}, existing id=${existing.id}, existing email=${existing.email})`
+            );
+            updated++;
+          } else {
+            const slugOwner = await prisma.rep.findUnique({ where: { slug } });
+            if (slugOwner) {
+              const warning = `Slug "${slug}" already belongs to ${slugOwner.firstName} ${slugOwner.lastName} <${slugOwner.email}> (id=${slugOwner.id}). Skipping ${firstName} ${lastName} <${email}> in "${tabName}".`;
+              console.warn(`[sync-roster] SKIP ${warning}`);
+              errors.push(warning);
+              skipped++;
+              continue;
+            }
+
+            const createdRep = await prisma.rep.create({
+              data: {
+                firstName,
+                lastName,
+                email,
+                slug,
+                jobTitle,
+                phone,
+                role,
+              },
+            });
+            console.log(
+              `[sync-roster] CREATE ${firstName} ${lastName} <${email}> in "${tabName}" (id=${createdRep.id}, slug=${slug})`
+            );
             created++;
           }
 
-          // Upsert NextAuth User so magic link login works
           await prisma.user.upsert({
             where: { email },
             update: { name: `${firstName} ${lastName}` },
             create: { email, name: `${firstName} ${lastName}` },
           });
         } catch (err) {
-          errors.push(`Row ${i + 1} in "${tabName}" (${email}): ${err instanceof Error ? err.message : String(err)}`);
+          const message = err instanceof Error ? err.message : String(err);
+          console.error(`[sync-roster] ERROR row ${i + 1} in "${tabName}" (${email}): ${message}`);
+          errors.push(`Row ${i + 1} in "${tabName}" (${email}): ${message}`);
         }
       }
     }
+
+    console.log(
+      `[sync-roster] Done. created=${created}, updated=${updated}, skipped=${skipped}, errors=${errors.length}`
+    );
 
     return NextResponse.json({
       created,
