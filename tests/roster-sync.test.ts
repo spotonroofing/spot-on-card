@@ -331,6 +331,41 @@ test('core path never deactivates ADMIN_EMAILS reps even if Core says inactive',
   assert.equal(reps.find((r) => r.id === 'adm')!.isActive, true);
 });
 
+test('core path leaves jobTitle and phone untouched when Core has no value', async () => {
+  const { db, reps } = makeFakeDb([
+    { id: 'r1', email: 'brack@spotonroof.com', firstName: 'Brack', lastName: 'Dillon', slug: 'brack-dillon', jobTitle: 'Owner', phone: '614-555-9999', isActive: true },
+  ]);
+  stubCoreApi([
+    coreEntry({
+      firstName: 'Brack',
+      lastName: 'Dillon',
+      workEmail: 'brack@spotonroof.com',
+      roleLabel: null,
+      phone: null,
+    }),
+  ]);
+  const result = await syncFromCore(db);
+  assert.equal(result.updated, 1);
+  const rep = reps.find((r) => r.id === 'r1')!;
+  assert.equal(rep.jobTitle, 'Owner');
+  assert.equal(rep.phone, '614-555-9999');
+});
+
+test('sheet path still overwrites phone with an empty cell (unchanged behavior)', async () => {
+  const { db, reps } = makeFakeDb([
+    { id: 'r1', email: 'john.doe@spotonroof.com', firstName: 'John', lastName: 'Doe', slug: 'john-doe', phone: '614-0000', isActive: true },
+  ]);
+  const result = emptyResult();
+  await processSheetRows(
+    db,
+    'Sales',
+    [SHEET_HEADERS, ['John', 'Doe', 'Closer', '', 'john.doe@spotonroof.com', '']],
+    result,
+    new Set()
+  );
+  assert.equal(reps.find((r) => r.id === 'r1')!.phone, '');
+});
+
 test('core path updates an existing rep and reactivates when Core says active', async () => {
   const { db, reps } = makeFakeDb([
     { id: 'r1', email: 'alex@spotonroof.com', firstName: 'Alex', lastName: 'Warbritton', slug: 'alex-warbritton', jobTitle: 'Old Title', isActive: false },

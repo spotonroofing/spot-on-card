@@ -80,8 +80,9 @@ interface RosterPerson {
   firstName: string;
   lastName: string;
   email: string;
-  phone: string;
-  jobTitle: string;
+  /** undefined = leave the existing value untouched (core path when Core has no value). */
+  phone: string | undefined;
+  jobTitle: string | undefined;
 }
 
 /**
@@ -123,8 +124,8 @@ async function syncPerson(
           firstName,
           lastName,
           email,
-          jobTitle,
-          phone,
+          ...(jobTitle !== undefined ? { jobTitle } : {}),
+          ...(phone !== undefined ? { phone } : {}),
           role,
           isActive: true,
         },
@@ -149,8 +150,8 @@ async function syncPerson(
           lastName,
           email,
           slug,
-          jobTitle,
-          phone,
+          jobTitle: jobTitle ?? '',
+          phone: phone ?? '',
           role,
           isActive: true,
         },
@@ -414,8 +415,8 @@ export async function syncFromCore(db: RosterDb): Promise<SyncResult> {
         firstName,
         lastName,
         email,
-        phone: (entry.phone || '').trim(),
-        jobTitle: (entry.roleLabel || '').trim(),
+        phone: (entry.phone || '').trim() || undefined,
+        jobTitle: (entry.roleLabel || '').trim() || undefined,
       },
       'from Core',
       'Core entry',
