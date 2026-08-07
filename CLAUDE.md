@@ -75,6 +75,9 @@ NEXTAUTH_SECRET=         # openssl rand -base64 32
 NEXTAUTH_URL=            # https://card.spotonroof.com (http://localhost:3000 for dev)
 RESEND_API_KEY=          # From resend.com dashboard
 RESEND_FROM_EMAIL=       # e.g. noreply@spotonroof.com
+ROSTER_SOURCE=           # unset/"sheet" = Google Sheets (current), "core" = SpotOn Core
+SPOTON_ROSTER_URL=       # SpotOn Core roster API endpoint (.../api/roster)
+SPOTON_ROSTER_KEY=       # x-spoton-key for the Core roster API
 ```
 
 ## Current State
@@ -89,3 +92,11 @@ Complete. All pages, API routes, middleware, and components are implemented and 
 - NextAuth magic links expire in 24h by default — show a friendly 'resend' option on expiry
 - Prisma: always run 'npx prisma generate' after schema changes before running the app
 - Deactivated rep slugs should show 'card no longer active' not 404
+
+## Roster Sync Cutover (Google Sheets → SpotOn Core)
+
+The admin roster sync (`src/lib/roster-sync.ts`, driven by the admin dashboard sync button) has two sources selected by `ROSTER_SOURCE`: unset or `sheet` reads the Google Sheet (current behavior), `core` reads SpotOn Core's keyed roster API. `SPOTON_ROSTER_URL` and `SPOTON_ROSTER_KEY` are already set on the Railway service.
+
+Cutover night: set `ROSTER_SOURCE=core` on the spoton-card Railway service (one env var, no deploy needed) and run the sync from the admin dashboard — the response message states which source ran. On the core path, deactivation follows each Core row's `active` flag, never absence from the response; roll back by deleting `ROSTER_SOURCE`.
+
+Post-cutover cleanup (separate task): remove the sheet path from `src/lib/roster-sync.ts`, drop the `googleapis` dependency, and delete `GOOGLE_SERVICE_ACCOUNT_KEY` / `GOOGLE_SHEET_ID` from Railway.

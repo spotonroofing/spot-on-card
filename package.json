@@ -8,6 +8,7 @@
     "build": "prisma generate && next build",
     "start": "prisma migrate deploy && next start",
     "lint": "next lint",
+    "test": "tsx --test tests/roster-sync.test.ts",
     "postinstall": "prisma generate"
   },
   "prisma": {

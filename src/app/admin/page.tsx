@@ -144,8 +144,10 @@ export default function AdminPage() {
       if (res.ok) {
         const parts = [`Created ${data.created}, updated ${data.updated}`];
         if (data.skipped > 0) parts.push(`${data.skipped} skipped (no email)`);
+        if (data.deactivated > 0) parts.push(`${data.deactivated} deactivated`);
         if (data.errors?.length) parts.push(`${data.errors.length} error(s)`);
-        setMessage(`Roster sync complete: ${parts.join(', ')}`);
+        const sourceLabel = data.source === 'core' ? 'SpotOn Core' : 'Google Sheet';
+        setMessage(`Roster sync complete (source: ${sourceLabel}): ${parts.join(', ')}`);
         loadData();
       } else {
         setMessage(`Sync failed: ${data.error || 'Unknown error'}`);
