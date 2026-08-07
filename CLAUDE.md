@@ -59,13 +59,13 @@ npx prisma db seed
 - Logo: 'Spot' white, 'On' blue, 'Roof' white — 'O' has house icon
 - Typography: bold name (white), job title (blue), clean hierarchy
 - Card page is mobile-first — almost all traffic comes from NFC taps on phones
-- See SPEC.md for full design reference, layout order, and NFC card image description
+- See `docs/spot-on-digital-card-spec.md` for full design reference, layout order, and NFC card image description
 
 ## External Services
 
 - Resend: transactional email for magic links. Auth via RESEND_API_KEY env var. Docs: resend.com/docs
 - Railway: hosting + managed Postgres. DATABASE_URL env var. Docs: docs.railway.com
-- See SPEC.md for full integration details
+- See `docs/spot-on-digital-card-spec.md` for full integration details
 
 ## Environment Variables
 
@@ -79,14 +79,7 @@ RESEND_FROM_EMAIL=       # e.g. noreply@spotonroof.com
 
 ## Current State
 
-Status: All 6 phases complete. App builds successfully. All pages, API routes, middleware, and components are implemented.
-
-- Phase 1 Foundation: Done (Next.js, Prisma, NextAuth, login)
-- Phase 2 Registration & Profiles: Done (register, edit page, photo upload)
-- Phase 3 Public Card Page: Done ([slug] page, vCard endpoint, QR code)
-- Phase 4 Analytics: Done (event logging, bot filtering, stats API)
-- Phase 5 Admin Dashboard: Done (rep CRUD, company settings, analytics overview)
-- Phase 6 Polish: Done (middleware auth guards, OG meta tags, not-found page, SessionProvider)
+Complete. All pages, API routes, middleware, and components are implemented and the app builds clean. Remaining work is maintenance and polish.
 
 ## Known Gotchas
 
