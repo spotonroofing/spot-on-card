@@ -10,6 +10,11 @@ export const CLAIMS_CONTACT = {
   photoPath: 'public/images/claims-contact.jpg',
 };
 
+// Junior / regular / Senior Field Inspector. Everyone from Team Lead up is not one.
+export function isFieldInspector(jobTitle: string): boolean {
+  return /field inspector/i.test(jobTitle);
+}
+
 export function showsClaimsContact(rep: { jobTitle: string; email: string }): boolean {
-  return /field inspector/i.test(rep.jobTitle) && rep.email.toLowerCase() !== CLAIMS_CONTACT.email;
+  return isFieldInspector(rep.jobTitle) && rep.email.toLowerCase() !== CLAIMS_CONTACT.email;
 }

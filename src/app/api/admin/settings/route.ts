@@ -35,6 +35,7 @@ export async function PUT(req: NextRequest) {
         companyInstagram: data.companyInstagram !== undefined ? data.companyInstagram : settings.companyInstagram,
         companyFacebook: data.companyFacebook !== undefined ? data.companyFacebook : settings.companyFacebook,
         companyLinkedIn: data.companyLinkedIn !== undefined ? data.companyLinkedIn : settings.companyLinkedIn,
+        companyBBB: data.companyBBB !== undefined ? data.companyBBB : settings.companyBBB,
         companyTikTok: data.companyTikTok !== undefined ? data.companyTikTok : settings.companyTikTok,
         reviewLink: data.reviewLink !== undefined ? data.reviewLink : settings.reviewLink,
         inviteCode: data.inviteCode ?? settings.inviteCode,

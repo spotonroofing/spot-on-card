@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useRef, useState } from 'react';
-import { CLAIMS_CONTACT, showsClaimsContact } from '@/lib/claims-contact';
+import { CLAIMS_CONTACT, isFieldInspector, showsClaimsContact } from '@/lib/claims-contact';
 
 function formatPhone(raw: string): string {
   const digits = raw.replace(/\D/g, '');
@@ -36,7 +36,7 @@ interface CompanyData {
   companyWebsite: string;
   companyInstagram: string | null;
   companyFacebook: string | null;
-  companyLinkedIn: string | null;
+  companyBBB: string | null;
   companyTikTok: string | null;
   reviewLink: string | null;
 }
@@ -93,7 +93,7 @@ export default function CardClient({ rep, company }: { rep: RepData; company: Co
   // Company socials
   if (company?.companyInstagram) socials.push({ type: 'instagram', url: company.companyInstagram, label: 'Instagram' });
   if (company?.companyFacebook) socials.push({ type: 'facebook', url: company.companyFacebook, label: 'Facebook' });
-  if (company?.companyLinkedIn) socials.push({ type: 'linkedin', url: company.companyLinkedIn, label: 'LinkedIn' });
+  if (company?.companyBBB) socials.push({ type: 'bbb', url: company.companyBBB, label: 'BBB' });
   if (company?.companyTikTok) socials.push({ type: 'tiktok', url: company.companyTikTok, label: 'TikTok' });
 
   // Rep personal socials (avoid duplicates by type)
@@ -136,7 +136,8 @@ export default function CardClient({ rep, company }: { rep: RepData; company: Co
   const hasClaims = showsClaimsContact(rep);
   const phoneIdx = hasPhone ? sectionIndex++ : -1;
   const claimsIdx = hasClaims ? sectionIndex++ : -1;
-  const emailIdx = rep.email ? sectionIndex++ : -1;
+  const showEmail = !!rep.email && !isFieldInspector(rep.jobTitle);
+  const emailIdx = showEmail ? sectionIndex++ : -1;
   const addressIdx = company?.companyAddress ? sectionIndex++ : -1;
   const websiteIdx = company?.companyWebsite ? sectionIndex++ : -1;
   const reviewIdx = sectionIndex++;
@@ -336,8 +337,8 @@ export default function CardClient({ rep, company }: { rep: RepData; company: Co
             </div>
           )}
 
-          {/* Email row */}
-          {rep.email && (
+          {/* Email row (hidden for field inspectors) */}
+          {showEmail && (
             <a
               href={`mailto:${rep.email}`}
               className="flex items-center gap-3 py-1.5 rounded-xl block"
@@ -526,6 +527,12 @@ function SocialIcon({ type }: { type: string }) {
       return (
         <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
           <path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433a2.062 2.062 0 01-2.063-2.065 2.064 2.064 0 112.063 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z" />
+        </svg>
+      );
+    case 'bbb':
+      return (
+        <svg className="w-5 h-5" viewBox="0 0 24 24" fill="currentColor">
+          <text x="12" y="16.5" textAnchor="middle" fontSize="13" fontWeight="800" fontFamily="Outfit, DM Sans, Arial, sans-serif" textLength="23" lengthAdjust="spacingAndGlyphs">BBB</text>
         </svg>
       );
     case 'tiktok':

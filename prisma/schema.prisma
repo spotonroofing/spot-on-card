@@ -73,6 +73,7 @@ model CompanySettings {
   companyInstagram    String?
   companyFacebook     String?
   companyLinkedIn     String?
+  companyBBB          String?
   companyTikTok       String?
   companyYouTube      String?
   reviewLink          String?

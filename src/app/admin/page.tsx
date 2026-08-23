@@ -36,6 +36,7 @@ interface CompanySettings {
   companyInstagram: string | null;
   companyFacebook: string | null;
   companyLinkedIn: string | null;
+  companyBBB: string | null;
   companyTikTok: string | null;
   reviewLink: string | null;
   inviteCode: string;
@@ -656,7 +657,7 @@ function SettingsForm({
           {[
             { key: 'companyInstagram', label: 'Instagram' },
             { key: 'companyFacebook', label: 'Facebook' },
-            { key: 'companyLinkedIn', label: 'LinkedIn' },
+            { key: 'companyBBB', label: 'BBB' },
             { key: 'companyTikTok', label: 'TikTok' },
           ].map(({ key, label }) => (
             <div key={key}>

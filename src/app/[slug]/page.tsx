@@ -103,7 +103,7 @@ export default async function CardPage({ params }: Props) {
         companyWebsite: company.companyWebsite,
         companyInstagram: company.companyInstagram,
         companyFacebook: company.companyFacebook,
-        companyLinkedIn: company.companyLinkedIn,
+        companyBBB: company.companyBBB,
         companyTikTok: company.companyTikTok,
         reviewLink: company.reviewLink,
       } : null}
