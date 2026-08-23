@@ -49,6 +49,7 @@ export default function CardClient({ rep, company }: { rep: RepData; company: Co
   const [showMapsModal, setShowMapsModal] = useState(false);
   const firstNameRef = useRef<HTMLSpanElement>(null);
   const lastNameRef = useRef<HTMLSpanElement>(null);
+  const claimsLabelRef = useRef<HTMLSpanElement>(null);
 
   // Trigger entrance animations after mount, then clean up transforms
   const [animDone, setAnimDone] = useState(false);
@@ -108,17 +109,18 @@ export default function CardClient({ rep, company }: { rep: RepData; company: Co
 
   // Auto-scale name text to fit available width without wrapping
   useEffect(() => {
-    function fitText(el: HTMLSpanElement | null, baseSize: number) {
+    function fitText(el: HTMLSpanElement | null, baseSize: number, minSize = 12) {
       if (!el) return;
       el.style.fontSize = `${baseSize}px`;
       if (el.scrollWidth > el.clientWidth && el.clientWidth > 0) {
         const scale = el.clientWidth / el.scrollWidth;
-        el.style.fontSize = `${Math.max(Math.floor(baseSize * scale), 12)}px`;
+        el.style.fontSize = `${Math.max(Math.floor(baseSize * scale), minSize)}px`;
       }
     }
     function fitAll() {
       fitText(firstNameRef.current, 30);
       fitText(lastNameRef.current, 36);
+      fitText(claimsLabelRef.current, 12, 8);
     }
     fitAll();
     window.addEventListener('resize', fitAll);
@@ -314,19 +316,19 @@ export default function CardClient({ rep, company }: { rep: RepData; company: Co
               </div>
               <a
                 href={`tel:${CLAIMS_CONTACT.phone}`}
-                className="flex-1 min-w-0 block rounded-lg"
+                className="flex-1 min-w-0 block rounded-lg overflow-hidden"
                 onClick={() => flash('claims-phone')}
                 style={tapStyle('claims-phone')}
               >
-                <span className="text-zinc-500 text-xs uppercase tracking-wider block">Insurance Claims</span>
+                <span ref={claimsLabelRef} className="text-zinc-500 text-xs uppercase tracking-wider block whitespace-nowrap">{CLAIMS_CONTACT.jobTitle}</span>
                 <span className="text-white text-sm block truncate">{CLAIMS_CONTACT.firstName} {CLAIMS_CONTACT.lastName}</span>
               </a>
               <button
-                className="flex items-center gap-1.5 h-10 px-3.5 rounded-lg text-white text-xs font-semibold flex-shrink-0"
-                style={{ background: 'linear-gradient(135deg, #0A7E8C, #004E5A)', ...tapStyle('claims-save') }}
+                className="flex items-center gap-1.5 h-10 px-2.5 rounded-lg bg-white/10 border border-white/20 text-zinc-200 text-[11px] font-medium flex-shrink-0"
+                style={tapStyle('claims-save')}
                 onClick={() => { flash('claims-save'); window.location.href = '/api/vcard/claims'; }}
               >
-                <svg className="w-4 h-4 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <svg className="w-4 h-4 text-zinc-300 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z" />
                 </svg>
                 Save Contact
