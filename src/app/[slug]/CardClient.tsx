@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useRef, useState } from 'react';
+import { CLAIMS_CONTACT, showsClaimsContact } from '@/lib/claims-contact';
 
 function formatPhone(raw: string): string {
   const digits = raw.replace(/\D/g, '');
@@ -130,7 +131,9 @@ export default function CardClient({ rep, company }: { rep: RepData; company: Co
   const heroIdx = sectionIndex++;
   const nameIdx = sectionIndex++;
   const quoteIdx = rep.bio ? sectionIndex++ : -1;
+  const hasClaims = showsClaimsContact(rep);
   const phoneIdx = hasPhone ? sectionIndex++ : -1;
+  const claimsIdx = hasClaims ? sectionIndex++ : -1;
   const emailIdx = rep.email ? sectionIndex++ : -1;
   const addressIdx = company?.companyAddress ? sectionIndex++ : -1;
   const websiteIdx = company?.companyWebsite ? sectionIndex++ : -1;
@@ -295,6 +298,39 @@ export default function CardClient({ rep, company }: { rep: RepData; company: Co
                   </a>
                 )}
               </div>
+            </div>
+          )}
+
+          {/* Insurance claims contact row (field inspectors only) */}
+          {hasClaims && (
+            <div
+              className="flex items-center gap-3 py-1.5 rounded-xl"
+              style={sectionStyle(claimsIdx)}
+            >
+              <div className="w-10 h-10 rounded-lg bg-spoton-blue/10 border border-spoton-blue/20 flex items-center justify-center flex-shrink-0">
+                <svg className="w-5 h-5 text-spoton-blue" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-2.016z" />
+                </svg>
+              </div>
+              <a
+                href={`tel:${CLAIMS_CONTACT.phone}`}
+                className="flex-1 min-w-0 block rounded-lg"
+                onClick={() => flash('claims-phone')}
+                style={tapStyle('claims-phone')}
+              >
+                <span className="text-zinc-500 text-xs uppercase tracking-wider block">Insurance Claims</span>
+                <span className="text-white text-sm block truncate">{CLAIMS_CONTACT.firstName} {CLAIMS_CONTACT.lastName}</span>
+              </a>
+              <button
+                className="flex items-center gap-1.5 h-10 px-3.5 rounded-lg text-white text-xs font-semibold flex-shrink-0"
+                style={{ background: 'linear-gradient(135deg, #0A7E8C, #004E5A)', ...tapStyle('claims-save') }}
+                onClick={() => { flash('claims-save'); window.location.href = '/api/vcard/claims'; }}
+              >
+                <svg className="w-4 h-4 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z" />
+                </svg>
+                Save Contact
+              </button>
             </div>
           )}
 
