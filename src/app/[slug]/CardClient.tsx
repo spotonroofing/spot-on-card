@@ -531,8 +531,8 @@ function SocialIcon({ type }: { type: string }) {
       );
     case 'bbb':
       return (
-        <svg className="w-5 h-5" viewBox="0 0 24 24" fill="currentColor">
-          <text x="12" y="16.5" textAnchor="middle" fontSize="13" fontWeight="800" fontFamily="Outfit, DM Sans, Arial, sans-serif" textLength="23" lengthAdjust="spacingAndGlyphs">BBB</text>
+        <svg className="w-4 h-4" viewBox="0 0 24 24" fill="currentColor">
+          <text x="12" y="22.5" textAnchor="middle" fontSize="29" fontWeight="800" fontFamily="Outfit, DM Sans, Arial, sans-serif">B</text>
         </svg>
       );
     case 'tiktok':
