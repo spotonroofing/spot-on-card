@@ -15,6 +15,11 @@ export function isFieldInspector(jobTitle: string): boolean {
   return /field inspector/i.test(jobTitle);
 }
 
+// Team Leaders also show the claims contact button. Matches "Team Lead" and "Team Leader".
+export function isTeamLeader(jobTitle: string): boolean {
+  return /team lead/i.test(jobTitle);
+}
+
 export function showsClaimsContact(rep: { jobTitle: string; email: string }): boolean {
-  return isFieldInspector(rep.jobTitle) && rep.email.toLowerCase() !== CLAIMS_CONTACT.email;
+  return (isFieldInspector(rep.jobTitle) || isTeamLeader(rep.jobTitle)) && rep.email.toLowerCase() !== CLAIMS_CONTACT.email;
 }
